@@ -1,0 +1,352 @@
+{
+  "appTitle": "CleanQuest",
+  "commonAdmin": "Admin",
+  "commonMember": "Użytkownik",
+  "commonCancel": "Anuluj",
+  "commonSave": "Zapisz",
+  "commonDelete": "Usuń",
+  "commonClose": "Zamknij",
+  "commonDone": "Gotowe",
+  "commonApprove": "Zatwierdź",
+  "commonReject": "Odrzuć",
+  "commonSubmit": "Wyślij",
+  "commonCopy": "Kopiuj",
+  "commonCopied": "Skopiowano",
+  "commonPointsLabel": "Punkty: {points}",
+  "@commonPointsLabel": {
+    "placeholders": {
+      "points": {}
+    }
+  },
+  "commonPointsShort": "{points} pkt",
+  "@commonPointsShort": {
+    "placeholders": {
+      "points": {}
+    }
+  },
+  "commonUnknownChore": "Nieznane zadanie",
+  "commonUnknownReward": "Nieznana nagroda",
+  "commonUnknownHousehold": "Gospodarstwo",
+  "onboardingTitle": "Witaj w CleanQuest",
+  "onboardingChooseRole": "Wybierz rolę",
+  "onboardingRoleSubtitle": "Admini weryfikują pracę. Użytkownicy zgłaszają wykonanie.",
+  "onboardingYourName": "Twoje imię",
+  "onboardingHouseholdName": "Nazwa gospodarstwa",
+  "onboardingShareCode": "Udostępnij ten kod użytkownikom",
+  "onboardingFinishSetup": "Zakończ konfigurację",
+  "onboardingGenerateCode": "Wygeneruj nowy kod",
+  "onboardingCodeInstructions": "Użytkownicy wpiszą ten kod, aby dołączyć do gospodarstwa.",
+  "onboardingAdminCodeLabel": "Wpisz kod admina",
+  "onboardingJoinHousehold": "Dołącz do gospodarstwa",
+  "onboardingCodeRequired": "Kod jest wymagany.",
+  "onboardingCodeLength": "Wpisz 6-cyfrowy kod.",
+  "onboardingHouseholdNotFound": "Nie znaleziono gospodarstwa.",
+  "settingsTitle": "Ustawienia",
+  "settingsAdminJoinCode": "Kod admina",
+  "settingsHouseholdCode": "Kod gospodarstwa",
+  "settingsJoinCodeNotSet": "Nie ustawiono",
+  "settingsCodeCopiedToast": "Kod skopiowany",
+  "settingsEnableNotifications": "Włącz powiadomienia",
+  "settingsNotificationsSubtitle": "Powiadomienia o zatwierdzeniach i nagrodach",
+  "settingsDailyDigest": "Dzienny podsumowanie",
+  "settingsDailyDigestSubtitle": "Podsumowanie zadań i zatwierdzeń",
+  "settingsLanguage": "Język",
+  "settingsLanguageSubtitle": "Język aplikacji",
+  "languageEnglish": "Angielski",
+  "languagePolish": "Polski",
+  "settingsViewNotifications": "Zobacz powiadomienia",
+  "settingsRegenerateJoinCode": "Wygeneruj nowy kod",
+  "settingsRestoreTemplates": "Przywróć domyślne szablony",
+  "settingsLogOut": "Wyloguj (reset onboardingu)",
+  "settingsLogOutDialogTitle": "Wylogować?",
+  "settingsLogOutDialogBody": "To czyści rolę i wybór gospodarstwa na tym urządzeniu.",
+  "settingsReset": "Resetuj",
+  "settingsRegenerateDialogTitle": "Wygenerować nowy kod?",
+  "settingsRegenerateDialogBody": "Użytkownicy ze starym kodem nie będą mogli dołączyć.",
+  "settingsRegenerate": "Wygeneruj",
+  "settingsNewJoinCode": "Nowy kod",
+  "settingsNewCodeGenerated": "Nowy kod wygenerowany i skopiowany",
+  "settingsRestoreDialogTitle": "Przywrócić domyślne szablony?",
+  "settingsRestoreDialogBody": "To zastąpi obecne zadania i historię ukończeń dla tego gospodarstwa.",
+  "settingsRestore": "Przywróć",
+  "settingsTemplatesRestored": "Szablony przywrócone",
+  "settingsSwitchToAdmin": "Przełącz na admina",
+  "settingsSwitchToMember": "Przełącz na użytkownika",
+  "settingsSwitchedToAdmin": "Przełączono na admina",
+  "settingsSwitchedToMember": "Przełączono na użytkownika",
+  "settingsTesting": "Testy",
+  "settingsNoHouseholdToSwitch": "Brak gospodarstwa do przełączenia.",
+  "settingsDailyDigestScheduled": "Dzienny podsumowanie ustawione",
+  "settingsNotificationsDenied": "Brak zgody na powiadomienia",
+  "choresTitleWithRole": "Zadania ({role})",
+  "@choresTitleWithRole": {
+    "placeholders": {
+      "role": {}
+    }
+  },
+  "choresAddTooltip": "Dodaj zadanie",
+  "choresApprovalsTooltip": "Zatwierdzenia",
+  "choresMyRequestsTooltip": "Moje zgłoszenia",
+  "choresRequestCompletion": "Zgłoś wykonanie",
+  "choresAdminReviewHint": "Admin: sprawdź w Zatwierdzeniach",
+  "choresLastCleanedNever": "Ostatnio wykonane: nigdy",
+  "choresLastCleaned": "Ostatnio wykonane: {date}",
+  "@choresLastCleaned": {
+    "placeholders": {
+      "date": {}
+    }
+  },
+  "choresDueIn": "Do terminu: {duration}",
+  "@choresDueIn": {
+    "placeholders": {
+      "duration": {}
+    }
+  },
+  "choresOverdueBy": "Po terminie: {duration}",
+  "@choresOverdueBy": {
+    "placeholders": {
+      "duration": {}
+    }
+  },
+  "choresSnoozedUntil": "Uśpione do {date}",
+  "@choresSnoozedUntil": {
+    "placeholders": {
+      "date": {}
+    }
+  },
+  "choresPaused": "Wstrzymane",
+  "choresNoHistory": "Brak historii",
+  "choresNoteDialogTitle": "Dodać notatkę?",
+  "choresNoteDialogHint": "Opcjonalna notatka dla admina",
+  "choresSnoozeDialogTitle": "Uśpij zadanie",
+  "choresSnooze1Day": "1 dzień",
+  "choresSnooze3Days": "3 dni",
+  "choresSnooze1Week": "1 tydzień",
+  "choresSnoozePickDate": "Wybierz datę",
+  "choresRequestSubmitted": "Zgłoszenie wysłane",
+  "choresMarkedCleaned": "Oznaczono jako wykonane",
+  "choresSnoozedUntilToast": "Uśpione do {date}",
+  "@choresSnoozedUntilToast": {
+    "placeholders": {
+      "date": {}
+    }
+  },
+  "choresSnoozeCleared": "Uśpienie usunięte",
+  "choresPausedToast": "Wstrzymane",
+  "choresResumedToast": "Wznowione",
+  "choresCleanedNow": "Wykonane teraz",
+  "choresSnooze": "Uśpij",
+  "choresClearSnooze": "Usuń uśpienie",
+  "choresPause": "Wstrzymaj",
+  "choresResume": "Wznów",
+  "choreDetailsTitle": "Szczegóły zadania",
+  "choreEditTitle": "Edytuj zadanie",
+  "choreNewTitle": "Nowe zadanie",
+  "choreLastCleanedTitle": "Ostatnio wykonane",
+  "choreNoApprovedCompletions": "Brak zatwierdzonych ukończeń",
+  "choreNameLabel": "Nazwa zadania",
+  "choreIconLabel": "Ikona (emoji)",
+  "choreCategoryLabel": "Kategoria",
+  "choreRoomLabel": "Pomieszczenie lub strefa (opcjonalnie)",
+  "choreIntervalLabel": "Interwał (dni)",
+  "chorePointsLabel": "Punkty",
+  "chorePausedLabel": "Wstrzymane",
+  "choreSave": "Zapisz zadanie",
+  "choreDeleteTooltip": "Usuń zadanie",
+  "choreDeleteTitle": "Usunąć zadanie?",
+  "choreDeleteBody": "Tego nie można cofnąć.",
+  "choreNameRequired": "Nazwa jest wymagana.",
+  "choreIntervalPositive": "Interwał musi być dodatni.",
+  "chorePointsPositive": "Punkty muszą być dodatnie.",
+  "approvalsTitle": "Zatwierdzenia",
+  "myRequestsTitle": "Moje zgłoszenia",
+  "approvalsHistoryTitle": "Historia zatwierdzeń",
+  "approvalsNoPending": "Brak oczekujących zgłoszeń.",
+  "approvalsNoRequestsYet": "Brak zgłoszeń.",
+  "approvalsRequestedBy": "Zgłoszone przez {user}",
+  "@approvalsRequestedBy": {
+    "placeholders": {
+      "user": {}
+    }
+  },
+  "approvalsSubmittedAt": "Zgłoszono {date}",
+  "@approvalsSubmittedAt": {
+    "placeholders": {
+      "date": {}
+    }
+  },
+  "approvalsReviewedAt": "Sprawdzone {date}",
+  "@approvalsReviewedAt": {
+    "placeholders": {
+      "date": {}
+    }
+  },
+  "approvalsReviewedBy": "Sprawdzone przez {user}",
+  "@approvalsReviewedBy": {
+    "placeholders": {
+      "user": {}
+    }
+  },
+  "approvalsApprovedToast": "Zatwierdzono",
+  "approvalsRejectedToast": "Odrzucono",
+  "statusPending": "Oczekujące",
+  "statusApproved": "Zatwierdzone",
+  "statusRejected": "Odrzucone",
+  "dashboardToday": "Dzisiaj",
+  "dashboardTopPriorities": "Najważniejsze",
+  "dashboardQuickActions": "Szybkie akcje",
+  "dashboardRecentActivity": "Ostatnia aktywność",
+  "dashboardNoActivity": "Brak aktywności.",
+  "activityFilterAll": "Wszystkie",
+  "activityFilterApproved": "Zatwierdzone",
+  "activityFilterRejected": "Odrzucone",
+  "activityFilterPending": "Oczekujące",
+  "dashboardAllCaughtUp": "Na razie wszystko zrobione.",
+  "dashboardDueToday": "Na dziś",
+  "dashboardOverdue": "Po terminie",
+  "dashboardPendingApprovals": "Oczekujące",
+  "dashboardPoints": "Punkty",
+  "dashboardChoresBoard": "Lista zadań",
+  "dashboardRewards": "Nagrody",
+  "dashboardApprovals": "Zatwierdzenia",
+  "dashboardMyRequests": "Moje zgłoszenia",
+  "dashboardActivityCompletionRequest": "Zgłoszenie wykonania",
+  "dashboardActivityPending": "Oczekujące • {name}",
+  "@dashboardActivityPending": {
+    "placeholders": {
+      "name": {}
+    }
+  },
+  "dashboardActivityStatus": "{status} • {name}",
+  "@dashboardActivityStatus": {
+    "placeholders": {
+      "status": {},
+      "name": {}
+    }
+  },
+  "dashboardActivityRedemption": "Otworzono mystery box",
+  "rewardsTitle": "Nagrody",
+  "rewardsPointsBalance": "Saldo punktów",
+  "rewardsMysteryBoxes": "Mystery boxy",
+  "rewardsNoBoxes": "Brak dostępnych boxów.",
+  "rewardsViewOdds": "Zobacz szanse",
+  "rewardsOpenBox": "Otwórz box",
+  "rewardsYouGot": "Wylosowano",
+  "rewardsNice": "Super",
+  "rewardsManageRewards": "Zarządzaj nagrodami",
+  "rewardsWeightStatus": "Waga {weight} • {status}",
+  "@rewardsWeightStatus": {
+    "placeholders": {
+      "weight": {},
+      "status": {}
+    }
+  },
+  "rewardsEnabled": "Aktywne",
+  "rewardsDisabled": "Wyłączone",
+  "rewardsAddReward": "Dodaj nagrodę",
+  "rewardsManageBoxRules": "Zarządzaj zasadami boxów",
+  "rewardsCostRewardsCount": "Koszt {cost} • {count} nagród",
+  "@rewardsCostRewardsCount": {
+    "placeholders": {
+      "cost": {},
+      "count": {}
+    }
+  },
+  "rewardsAddBoxRule": "Dodaj zasadę boxa",
+  "rewardsMyRewards": "Moje nagrody",
+  "rewardsAdminRewards": "Nagrody admina",
+  "rewardsMemberRewards": "Nagrody użytkowników",
+  "rewardsNoRedemptions": "Brak nagród.",
+  "rewardsNoAdminRewards": "Brak nagród admina.",
+  "rewardsNoMemberRewards": "Brak nagród użytkowników.",
+  "rewardsViewAll": "Zobacz wszystko",
+  "rewardsCostPoints": "Koszt: {cost} punktów",
+  "@rewardsCostPoints": {
+    "placeholders": {
+      "cost": {}
+    }
+  },
+  "rewardsRewardsCount": "Nagrody: {count}",
+  "@rewardsRewardsCount": {
+    "placeholders": {
+      "count": {}
+    }
+  },
+  "rewardsAddRewardTitle": "Dodaj nagrodę",
+  "rewardsEditRewardTitle": "Edytuj nagrodę",
+  "rewardsAddBoxRuleTitle": "Dodaj zasadę boxa",
+  "rewardsEditBoxRuleTitle": "Edytuj zasadę boxa",
+  "rewardsTitleLabel": "Tytuł",
+  "rewardsDescriptionLabel": "Opis",
+  "rewardsWeightLabel": "Waga",
+  "rewardsEnabledLabel": "Aktywne",
+  "rewardsCostPointsLabel": "Koszt punktów",
+  "rewardsCooldownSecondsLabel": "Cooldown (sekundy)",
+  "rewardsMaxPerDayLabel": "Maks. na dzień",
+  "rewardsOddsTitle": "Szanse",
+  "rewardsDeleteRewardTitle": "Usunąć nagrodę?",
+  "rewardsDeleteRewardBody": "Ta nagroda zostanie usunięta z puli.",
+  "rewardsDeleteBoxRuleTitle": "Usunąć zasadę boxa?",
+  "rewardsDeleteBoxRuleBody": "Ten box nie będzie już dostępny.",
+  "rewardsNotEnoughPoints": "Za mało punktów na wykupienie.",
+  "rewardsCooldownActive": "Box jest w cooldownie. Spróbuj później.",
+  "rewardsDailyLimitReached": "Osiągnięto dzienny limit dla tego boxa.",
+  "rewardsCooldownRemaining": "Czas odnowienia: {remaining}",
+  "@rewardsCooldownRemaining": {
+    "placeholders": {
+      "remaining": {}
+    }
+  },
+  "rewardsDailyLimitStatus": "Limit dzienny: {count}/{max}",
+  "@rewardsDailyLimitStatus": {
+    "placeholders": {
+      "count": {},
+      "max": {}
+    }
+  },
+  "rewardsCooldownDisabledDebug": "Debug: cooldown wyłączony",
+  "rewardsDailyLimitDisabledDebug": "Debug: limit dzienny wyłączony",
+  "notificationsTitle": "Powiadomienia",
+  "notificationsEmpty": "Brak powiadomień.",
+  "areaCategoryHome": "Dom",
+  "areaCategoryCar": "Auto",
+  "areaCategoryOther": "Inne",
+  "itemStatusFresh": "Świeże",
+  "itemStatusSoon": "Wkrótce",
+  "itemStatusDue": "Na czas",
+  "itemStatusOverdue": "Po terminie",
+  "itemStatusSnoozed": "Uśpione",
+  "itemStatusPaused": "Wstrzymane",
+  "dailyDigestTitle": "Dzienne podsumowanie CleanQuest",
+  "dailyDigestBody": "Na dziś: {due} • Po terminie: {overdue}{pendingSegment}",
+  "@dailyDigestBody": {
+    "placeholders": {
+      "due": {},
+      "overdue": {},
+      "pendingSegment": {}
+    }
+  },
+  "dailyDigestPendingSegment": " • Oczekujące: {pending}",
+  "@dailyDigestPendingSegment": {
+    "placeholders": {
+      "pending": {}
+    }
+  },
+  "notificationNewApprovalTitle": "Nowe zgłoszenie",
+  "notificationNewApprovalBody": "Użytkownik wysłał zgłoszenie.",
+  "notificationRequestApprovedTitle": "Zgłoszenie zatwierdzone",
+  "notificationRequestApprovedBody": "Zgłoszenie zostało zatwierdzone.",
+  "notificationRequestRejectedTitle": "Zgłoszenie odrzucone",
+  "notificationRequestRejectedBody": "Zgłoszenie zostało odrzucone.",
+  "notificationRewardTitle": "Nagroda odebrana",
+  "notificationRewardBody": "{user} wygrał(a) {reward}",
+  "errorAdminsCannotSubmit": "Admini nie mogą zgłaszać wykonania.",
+  "errorOnlyAdminsApprove": "Tylko admin może zatwierdzać zgłoszenia.",
+  "errorOnlyAdminsReject": "Tylko admin może odrzucać zgłoszenia.",
+  "@notificationRewardBody": {
+    "placeholders": {
+      "user": {},
+      "reward": {}
+    }
+  }
+}

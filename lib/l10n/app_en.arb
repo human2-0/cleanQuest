@@ -1,0 +1,352 @@
+{
+  "appTitle": "CleanQuest",
+  "commonAdmin": "Admin",
+  "commonMember": "Member",
+  "commonCancel": "Cancel",
+  "commonSave": "Save",
+  "commonDelete": "Delete",
+  "commonClose": "Close",
+  "commonDone": "Done",
+  "commonApprove": "Approve",
+  "commonReject": "Reject",
+  "commonSubmit": "Submit",
+  "commonCopy": "Copy",
+  "commonCopied": "Copied",
+  "commonPointsLabel": "Points: {points}",
+  "@commonPointsLabel": {
+    "placeholders": {
+      "points": {}
+    }
+  },
+  "commonPointsShort": "{points} pts",
+  "@commonPointsShort": {
+    "placeholders": {
+      "points": {}
+    }
+  },
+  "commonUnknownChore": "Unknown chore",
+  "commonUnknownReward": "Unknown reward",
+  "commonUnknownHousehold": "Household",
+  "onboardingTitle": "Welcome to CleanQuest",
+  "onboardingChooseRole": "Choose your role",
+  "onboardingRoleSubtitle": "Admins verify work. Members submit completions.",
+  "onboardingYourName": "Your name",
+  "onboardingHouseholdName": "Household name",
+  "onboardingShareCode": "Share this code with members",
+  "onboardingFinishSetup": "Finish setup",
+  "onboardingGenerateCode": "Generate new code",
+  "onboardingCodeInstructions": "Members will enter this to join your household.",
+  "onboardingAdminCodeLabel": "Enter admin code",
+  "onboardingJoinHousehold": "Join household",
+  "onboardingCodeRequired": "Code is required.",
+  "onboardingCodeLength": "Enter the 6-digit code.",
+  "onboardingHouseholdNotFound": "Household not found.",
+  "settingsTitle": "Settings",
+  "settingsAdminJoinCode": "Admin join code",
+  "settingsHouseholdCode": "Household code",
+  "settingsJoinCodeNotSet": "Not set",
+  "settingsCodeCopiedToast": "Code copied",
+  "settingsEnableNotifications": "Enable notifications",
+  "settingsNotificationsSubtitle": "Approvals and reward alerts",
+  "settingsDailyDigest": "Daily digest",
+  "settingsDailyDigestSubtitle": "Due items and approvals summary",
+  "settingsLanguage": "Language",
+  "settingsLanguageSubtitle": "App language",
+  "languageEnglish": "English",
+  "languagePolish": "Polish",
+  "settingsViewNotifications": "View notifications",
+  "settingsRegenerateJoinCode": "Regenerate join code",
+  "settingsRestoreTemplates": "Restore default templates",
+  "settingsLogOut": "Log out (reset onboarding)",
+  "settingsLogOutDialogTitle": "Log out?",
+  "settingsLogOutDialogBody": "This clears your role and household selection on this device.",
+  "settingsReset": "Reset",
+  "settingsRegenerateDialogTitle": "Regenerate join code?",
+  "settingsRegenerateDialogBody": "Members with the old code will not be able to join.",
+  "settingsRegenerate": "Regenerate",
+  "settingsNewJoinCode": "New join code",
+  "settingsNewCodeGenerated": "New code generated and copied",
+  "settingsRestoreDialogTitle": "Restore default templates?",
+  "settingsRestoreDialogBody": "This replaces current chores and completion history for this household.",
+  "settingsRestore": "Restore",
+  "settingsTemplatesRestored": "Templates restored",
+  "settingsSwitchToAdmin": "Switch to admin",
+  "settingsSwitchToMember": "Switch to member",
+  "settingsSwitchedToAdmin": "Switched to admin",
+  "settingsSwitchedToMember": "Switched to member",
+  "settingsTesting": "Testing",
+  "settingsNoHouseholdToSwitch": "No household to switch.",
+  "settingsDailyDigestScheduled": "Daily digest scheduled",
+  "settingsNotificationsDenied": "Notifications permission denied",
+  "choresTitleWithRole": "Chores ({role})",
+  "@choresTitleWithRole": {
+    "placeholders": {
+      "role": {}
+    }
+  },
+  "choresAddTooltip": "Add chore",
+  "choresApprovalsTooltip": "Approvals",
+  "choresMyRequestsTooltip": "My requests",
+  "choresRequestCompletion": "Request completion",
+  "choresAdminReviewHint": "Admin: review in Approvals",
+  "choresLastCleanedNever": "Last cleaned: never",
+  "choresLastCleaned": "Last cleaned: {date}",
+  "@choresLastCleaned": {
+    "placeholders": {
+      "date": {}
+    }
+  },
+  "choresDueIn": "Due in {duration}",
+  "@choresDueIn": {
+    "placeholders": {
+      "duration": {}
+    }
+  },
+  "choresOverdueBy": "Overdue by {duration}",
+  "@choresOverdueBy": {
+    "placeholders": {
+      "duration": {}
+    }
+  },
+  "choresSnoozedUntil": "Snoozed until {date}",
+  "@choresSnoozedUntil": {
+    "placeholders": {
+      "date": {}
+    }
+  },
+  "choresPaused": "Paused",
+  "choresNoHistory": "No history yet",
+  "choresNoteDialogTitle": "Add a note?",
+  "choresNoteDialogHint": "Optional note for admin",
+  "choresSnoozeDialogTitle": "Snooze chore",
+  "choresSnooze1Day": "1 day",
+  "choresSnooze3Days": "3 days",
+  "choresSnooze1Week": "1 week",
+  "choresSnoozePickDate": "Pick a date",
+  "choresRequestSubmitted": "Request submitted",
+  "choresMarkedCleaned": "Marked as cleaned",
+  "choresSnoozedUntilToast": "Snoozed until {date}",
+  "@choresSnoozedUntilToast": {
+    "placeholders": {
+      "date": {}
+    }
+  },
+  "choresSnoozeCleared": "Snooze cleared",
+  "choresPausedToast": "Paused",
+  "choresResumedToast": "Resumed",
+  "choresCleanedNow": "Cleaned now",
+  "choresSnooze": "Snooze",
+  "choresClearSnooze": "Clear snooze",
+  "choresPause": "Pause",
+  "choresResume": "Resume",
+  "choreDetailsTitle": "Chore details",
+  "choreEditTitle": "Edit chore",
+  "choreNewTitle": "New chore",
+  "choreLastCleanedTitle": "Last cleaned",
+  "choreNoApprovedCompletions": "No approved completions yet",
+  "choreNameLabel": "Chore name",
+  "choreIconLabel": "Icon (emoji)",
+  "choreCategoryLabel": "Category",
+  "choreRoomLabel": "Room or zone (optional)",
+  "choreIntervalLabel": "Interval (days)",
+  "chorePointsLabel": "Points",
+  "chorePausedLabel": "Paused",
+  "choreSave": "Save chore",
+  "choreDeleteTooltip": "Delete chore",
+  "choreDeleteTitle": "Delete chore?",
+  "choreDeleteBody": "This cannot be undone.",
+  "choreNameRequired": "Name is required.",
+  "choreIntervalPositive": "Interval must be a positive number.",
+  "chorePointsPositive": "Points must be a positive number.",
+  "approvalsTitle": "Approvals",
+  "myRequestsTitle": "My requests",
+  "approvalsHistoryTitle": "Approval history",
+  "approvalsNoPending": "No pending requests.",
+  "approvalsNoRequestsYet": "No requests yet.",
+  "approvalsRequestedBy": "Requested by {user}",
+  "@approvalsRequestedBy": {
+    "placeholders": {
+      "user": {}
+    }
+  },
+  "approvalsSubmittedAt": "Submitted {date}",
+  "@approvalsSubmittedAt": {
+    "placeholders": {
+      "date": {}
+    }
+  },
+  "approvalsReviewedAt": "Reviewed {date}",
+  "@approvalsReviewedAt": {
+    "placeholders": {
+      "date": {}
+    }
+  },
+  "approvalsReviewedBy": "Reviewed by {user}",
+  "@approvalsReviewedBy": {
+    "placeholders": {
+      "user": {}
+    }
+  },
+  "approvalsApprovedToast": "Approved",
+  "approvalsRejectedToast": "Rejected",
+  "statusPending": "Pending",
+  "statusApproved": "Approved",
+  "statusRejected": "Rejected",
+  "dashboardToday": "Today",
+  "dashboardTopPriorities": "Top priorities",
+  "dashboardQuickActions": "Quick actions",
+  "dashboardRecentActivity": "Recent activity",
+  "dashboardNoActivity": "No activity yet.",
+  "activityFilterAll": "All",
+  "activityFilterApproved": "Approved",
+  "activityFilterRejected": "Rejected",
+  "activityFilterPending": "Pending",
+  "dashboardAllCaughtUp": "All caught up for now.",
+  "dashboardDueToday": "Due today",
+  "dashboardOverdue": "Overdue",
+  "dashboardPendingApprovals": "Pending approvals",
+  "dashboardPoints": "Points",
+  "dashboardChoresBoard": "Chores board",
+  "dashboardRewards": "Rewards",
+  "dashboardApprovals": "Approvals",
+  "dashboardMyRequests": "My requests",
+  "dashboardActivityCompletionRequest": "Completion request",
+  "dashboardActivityPending": "Pending • {name}",
+  "@dashboardActivityPending": {
+    "placeholders": {
+      "name": {}
+    }
+  },
+  "dashboardActivityStatus": "{status} • {name}",
+  "@dashboardActivityStatus": {
+    "placeholders": {
+      "status": {},
+      "name": {}
+    }
+  },
+  "dashboardActivityRedemption": "Mystery box opened",
+  "rewardsTitle": "Rewards",
+  "rewardsPointsBalance": "Points balance",
+  "rewardsMysteryBoxes": "Mystery boxes",
+  "rewardsNoBoxes": "No boxes available yet.",
+  "rewardsViewOdds": "View odds",
+  "rewardsOpenBox": "Open box",
+  "rewardsYouGot": "You got",
+  "rewardsNice": "Nice",
+  "rewardsManageRewards": "Manage rewards",
+  "rewardsWeightStatus": "Weight {weight} • {status}",
+  "@rewardsWeightStatus": {
+    "placeholders": {
+      "weight": {},
+      "status": {}
+    }
+  },
+  "rewardsEnabled": "Enabled",
+  "rewardsDisabled": "Disabled",
+  "rewardsAddReward": "Add reward",
+  "rewardsManageBoxRules": "Manage box rules",
+  "rewardsCostRewardsCount": "Cost {cost} • {count} rewards",
+  "@rewardsCostRewardsCount": {
+    "placeholders": {
+      "cost": {},
+      "count": {}
+    }
+  },
+  "rewardsAddBoxRule": "Add box rule",
+  "rewardsMyRewards": "My rewards",
+  "rewardsAdminRewards": "Admin rewards",
+  "rewardsMemberRewards": "Member rewards",
+  "rewardsNoRedemptions": "No redemptions yet.",
+  "rewardsNoAdminRewards": "No admin rewards yet.",
+  "rewardsNoMemberRewards": "No member rewards yet.",
+  "rewardsViewAll": "View all",
+  "rewardsCostPoints": "Cost: {cost} points",
+  "@rewardsCostPoints": {
+    "placeholders": {
+      "cost": {}
+    }
+  },
+  "rewardsRewardsCount": "Rewards: {count}",
+  "@rewardsRewardsCount": {
+    "placeholders": {
+      "count": {}
+    }
+  },
+  "rewardsAddRewardTitle": "Add reward",
+  "rewardsEditRewardTitle": "Edit reward",
+  "rewardsAddBoxRuleTitle": "Add box rule",
+  "rewardsEditBoxRuleTitle": "Edit box rule",
+  "rewardsTitleLabel": "Title",
+  "rewardsDescriptionLabel": "Description",
+  "rewardsWeightLabel": "Weight",
+  "rewardsEnabledLabel": "Enabled",
+  "rewardsCostPointsLabel": "Cost points",
+  "rewardsCooldownSecondsLabel": "Cooldown seconds",
+  "rewardsMaxPerDayLabel": "Max per day",
+  "rewardsOddsTitle": "Odds",
+  "rewardsDeleteRewardTitle": "Delete reward?",
+  "rewardsDeleteRewardBody": "This reward will be removed from the pool.",
+  "rewardsDeleteBoxRuleTitle": "Delete box rule?",
+  "rewardsDeleteBoxRuleBody": "This box will no longer be redeemable.",
+  "rewardsNotEnoughPoints": "Not enough points to redeem.",
+  "rewardsCooldownActive": "Box is cooling down. Try later.",
+  "rewardsDailyLimitReached": "Daily limit reached for this box.",
+  "rewardsCooldownRemaining": "Cooldown: {remaining}",
+  "@rewardsCooldownRemaining": {
+    "placeholders": {
+      "remaining": {}
+    }
+  },
+  "rewardsDailyLimitStatus": "Daily limit: {count}/{max}",
+  "@rewardsDailyLimitStatus": {
+    "placeholders": {
+      "count": {},
+      "max": {}
+    }
+  },
+  "rewardsCooldownDisabledDebug": "Debug: cooldown off",
+  "rewardsDailyLimitDisabledDebug": "Debug: daily limit off",
+  "notificationsTitle": "Notifications",
+  "notificationsEmpty": "No notifications yet.",
+  "areaCategoryHome": "Home",
+  "areaCategoryCar": "Car",
+  "areaCategoryOther": "Other",
+  "itemStatusFresh": "Fresh",
+  "itemStatusSoon": "Soon",
+  "itemStatusDue": "Due",
+  "itemStatusOverdue": "Overdue",
+  "itemStatusSnoozed": "Snoozed",
+  "itemStatusPaused": "Paused",
+  "dailyDigestTitle": "CleanQuest daily digest",
+  "dailyDigestBody": "Due today: {due} • Overdue: {overdue}{pendingSegment}",
+  "@dailyDigestBody": {
+    "placeholders": {
+      "due": {},
+      "overdue": {},
+      "pendingSegment": {}
+    }
+  },
+  "dailyDigestPendingSegment": " • Pending approvals: {pending}",
+  "@dailyDigestPendingSegment": {
+    "placeholders": {
+      "pending": {}
+    }
+  },
+  "notificationNewApprovalTitle": "New approval request",
+  "notificationNewApprovalBody": "A member submitted a request.",
+  "notificationRequestApprovedTitle": "Request approved",
+  "notificationRequestApprovedBody": "A request was approved.",
+  "notificationRequestRejectedTitle": "Request rejected",
+  "notificationRequestRejectedBody": "A request was rejected.",
+  "notificationRewardTitle": "Reward redeemed",
+  "notificationRewardBody": "{user} won {reward}",
+  "errorAdminsCannotSubmit": "Admins cannot submit completion requests.",
+  "errorOnlyAdminsApprove": "Only admins can approve requests.",
+  "errorOnlyAdminsReject": "Only admins can reject requests.",
+  "@notificationRewardBody": {
+    "placeholders": {
+      "user": {},
+      "reward": {}
+    }
+  }
+}
