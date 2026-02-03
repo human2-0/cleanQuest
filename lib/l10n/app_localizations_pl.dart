@@ -48,6 +48,9 @@ class AppLocalizationsPl extends AppLocalizations {
   String get commonCopied => 'Skopiowano';
 
   @override
+  String get commonUnknown => 'Nieznane';
+
+  @override
   String commonPointsLabel(Object points) {
     return 'Punkty: $points';
   }
@@ -70,11 +73,17 @@ class AppLocalizationsPl extends AppLocalizations {
   String get onboardingTitle => 'Witaj w CleanQuest';
 
   @override
-  String get onboardingChooseRole => 'Wybierz rolę';
+  String get onboardingChooseRole => 'Utwórz lub dołącz do gospodarstwa';
 
   @override
   String get onboardingRoleSubtitle =>
-      'Admini weryfikują pracę. Użytkownicy zgłaszają wykonanie.';
+      'Twórca zostaje administratorem. Pozostali dołączają jako członkowie.';
+
+  @override
+  String get onboardingCreateHouseholdLabel => 'Utwórz gospodarstwo';
+
+  @override
+  String get onboardingJoinHouseholdLabel => 'Dołącz do gospodarstwa';
 
   @override
   String get onboardingYourName => 'Twoje imię';
@@ -84,6 +93,13 @@ class AppLocalizationsPl extends AppLocalizations {
 
   @override
   String get onboardingShareCode => 'Udostępnij ten kod użytkownikom';
+
+  @override
+  String get onboardingQrTitle => 'Kod QR';
+
+  @override
+  String get onboardingQrHint =>
+      'Zeskanuj kod QR, aby dołączyć do gospodarstwa.';
 
   @override
   String get onboardingFinishSetup => 'Zakończ konfigurację';
@@ -96,7 +112,7 @@ class AppLocalizationsPl extends AppLocalizations {
       'Użytkownicy wpiszą ten kod, aby dołączyć do gospodarstwa.';
 
   @override
-  String get onboardingAdminCodeLabel => 'Wpisz kod admina';
+  String get onboardingAdminCodeLabel => 'Wpisz kod dołączenia';
 
   @override
   String get onboardingJoinHousehold => 'Dołącz do gospodarstwa';
@@ -137,6 +153,12 @@ class AppLocalizationsPl extends AppLocalizations {
 
   @override
   String get settingsDailyDigestSubtitle => 'Podsumowanie zadań i zatwierdzeń';
+
+  @override
+  String get settingsDarkMode => 'Tryb ciemny';
+
+  @override
+  String get settingsDarkModeSubtitle => 'Użyj ciemnego motywu';
 
   @override
   String get settingsLanguage => 'Język';
@@ -221,6 +243,85 @@ class AppLocalizationsPl extends AppLocalizations {
       'Brak gospodarstwa do przełączenia.';
 
   @override
+  String get settingsProfilesTitle => 'Profile';
+
+  @override
+  String get settingsProfilesNoActive => 'Brak aktywnego profilu';
+
+  @override
+  String get settingsProfilesAdd => 'Dodaj profil';
+
+  @override
+  String get settingsProfilesSwitchTitle => 'Zmień profil';
+
+  @override
+  String get settingsProfilesCreateTitle => 'Utwórz profil';
+
+  @override
+  String get settingsProfilesCreateAdmin => 'Utwórz profil administratora';
+
+  @override
+  String get settingsProfilesJoinHousehold => 'Dołącz do gospodarstwa';
+
+  @override
+  String get settingsProfilesDisplayName => 'Nazwa wyświetlana';
+
+  @override
+  String get profileNameRequired => 'Imię jest wymagane.';
+
+  @override
+  String get settingsProfilesHouseholdName => 'Nazwa gospodarstwa';
+
+  @override
+  String get settingsProfilesJoinCode => 'Kod gospodarstwa';
+
+  @override
+  String get settingsProfilesCreate => 'Utwórz';
+
+  @override
+  String get settingsProfilesCodeLabel => 'Kod dołączenia';
+
+  @override
+  String get settingsProfilesRenameTitle => 'Zmień nazwę profilu';
+
+  @override
+  String get settingsProfilesFindNearby => 'Znajdź w pobliżu';
+
+  @override
+  String get settingsProfilesDiscoveryStatusTitle => 'Status wykrywania';
+
+  @override
+  String get settingsProfilesDiscoveryLogTitle => 'Dziennik wykrywania';
+
+  @override
+  String get settingsProfilesDiscoveryIdle => 'Bezczynny';
+
+  @override
+  String get settingsProfilesDiscoveryStarting => 'Uruchamianie wykrywania...';
+
+  @override
+  String get settingsProfilesDiscoveryScanning =>
+      'Skanowanie pobliskich gospodarstw...';
+
+  @override
+  String get settingsProfilesDiscoveryFinished => 'Wykrywanie zakończone.';
+
+  @override
+  String get settingsProfilesDiscoveryNone =>
+      'Nie znaleziono gospodarstw w pobliżu.';
+
+  @override
+  String settingsProfilesDiscoveryFound(int count) {
+    return 'Znaleziono $count gospodarstw w pobliżu.';
+  }
+
+  @override
+  String get settingsProfilesNoNearby => 'Nie znaleziono gospodarstw w pobliżu';
+
+  @override
+  String get settingsProfilesNearbyTitle => 'Gospodarstwa w pobliżu';
+
+  @override
   String get settingsDailyDigestScheduled => 'Dzienny podsumowanie ustawione';
 
   @override
@@ -276,6 +377,37 @@ class AppLocalizationsPl extends AppLocalizations {
   String get choresNoHistory => 'Brak historii';
 
   @override
+  String get choresUseAmulet => 'Użyj amuletu';
+
+  @override
+  String choresProtectionUntil(Object date) {
+    return 'Ochrona do $date';
+  }
+
+  @override
+  String get choresAmuletAlreadyUsed => 'Amulet już użyty dla tego zadania.';
+
+  @override
+  String get choresAmuletAlreadyActive => 'Zadanie jest już chronione.';
+
+  @override
+  String get choresAmuletNone => 'Brak dostępnych amuletów.';
+
+  @override
+  String get choresAmuletSelectTitle => 'Wybierz amulet';
+
+  @override
+  String get choresAmuletConfirmTitle => 'Użyć amuletu?';
+
+  @override
+  String choresAmuletConfirmBody(Object chore) {
+    return 'Użyć amuletu dla $chore?';
+  }
+
+  @override
+  String get choresAmuletApplied => 'Amulet użyty';
+
+  @override
   String get choresNoteDialogTitle => 'Dodać notatkę?';
 
   @override
@@ -297,7 +429,7 @@ class AppLocalizationsPl extends AppLocalizations {
   String get choresSnoozePickDate => 'Wybierz datę';
 
   @override
-  String get choresRequestSubmitted => 'Zgłoszenie wysłane';
+  String get choresRequestSubmitted => 'Wysłano do weryfikacji';
 
   @override
   String get choresMarkedCleaned => 'Oznaczono jako wykonane';
@@ -359,7 +491,19 @@ class AppLocalizationsPl extends AppLocalizations {
   String get choreRoomLabel => 'Pomieszczenie lub strefa (opcjonalnie)';
 
   @override
+  String get choreTypeLabel => 'Typ zadania';
+
+  @override
+  String get choreTypeSingular => 'Jednorazowe';
+
+  @override
+  String get choreTypeRecurring => 'Cykliczne';
+
+  @override
   String get choreIntervalLabel => 'Interwał (dni)';
+
+  @override
+  String get choreOverdueWeightLabel => 'Waga zaległości (punkty/dzień)';
 
   @override
   String get chorePointsLabel => 'Punkty';
@@ -387,6 +531,10 @@ class AppLocalizationsPl extends AppLocalizations {
 
   @override
   String get chorePointsPositive => 'Punkty muszą być dodatnie.';
+
+  @override
+  String get choreOverdueWeightInvalid =>
+      'Waga zaległości musi być równa lub większa od 0.';
 
   @override
   String get approvalsTitle => 'Zatwierdzenia';
@@ -430,7 +578,7 @@ class AppLocalizationsPl extends AppLocalizations {
   String get approvalsRejectedToast => 'Odrzucono';
 
   @override
-  String get statusPending => 'Oczekujące';
+  String get statusPending => 'W trakcie weryfikacji';
 
   @override
   String get statusApproved => 'Zatwierdzone';
@@ -484,7 +632,7 @@ class AppLocalizationsPl extends AppLocalizations {
   String get dashboardChoresBoard => 'Lista zadań';
 
   @override
-  String get dashboardRewards => 'Nagrody';
+  String get dashboardRewards => 'Sklep';
 
   @override
   String get dashboardApprovals => 'Zatwierdzenia';
@@ -509,7 +657,7 @@ class AppLocalizationsPl extends AppLocalizations {
   String get dashboardActivityRedemption => 'Otworzono mystery box';
 
   @override
-  String get rewardsTitle => 'Nagrody';
+  String get rewardsTitle => 'Sklep';
 
   @override
   String get rewardsPointsBalance => 'Saldo punktów';
@@ -537,7 +685,7 @@ class AppLocalizationsPl extends AppLocalizations {
 
   @override
   String rewardsWeightStatus(Object weight, Object status) {
-    return 'Waga $weight • $status';
+    return 'Szansa $weight% • $status';
   }
 
   @override
@@ -564,22 +712,77 @@ class AppLocalizationsPl extends AppLocalizations {
   String get rewardsMyRewards => 'Moje nagrody';
 
   @override
-  String get rewardsAdminRewards => 'Nagrody admina';
+  String get shopItemsTitle => 'Przedmioty w sklepie';
 
   @override
-  String get rewardsMemberRewards => 'Nagrody użytkowników';
+  String get shopBuy => 'Kup';
+
+  @override
+  String get shopPurchaseSuccess => 'Dodano do ekwipunku';
+
+  @override
+  String get inventoryTitle => 'Ekwipunek';
+
+  @override
+  String get inventoryEmpty => 'Brak przedmiotów.';
+
+  @override
+  String get inventoryUseFromChore => 'Użyj z menu zadania';
+
+  @override
+  String amuletLossProtection(Object hours) {
+    return 'Amulet ochrony strat (${hours}h)';
+  }
+
+  @override
+  String amuletDurationLabel(Object hours) {
+    return 'Wstrzymuje zaległości na $hours godzin';
+  }
 
   @override
   String get rewardsNoRedemptions => 'Brak nagród.';
 
   @override
-  String get rewardsNoAdminRewards => 'Brak nagród admina.';
-
-  @override
-  String get rewardsNoMemberRewards => 'Brak nagród użytkowników.';
-
-  @override
   String get rewardsViewAll => 'Zobacz wszystko';
+
+  @override
+  String get rewardsFilterLabel => 'Filtr';
+
+  @override
+  String get rewardsFilterAll => 'Wszystkie';
+
+  @override
+  String get rewardsRedeem => 'Odbierz';
+
+  @override
+  String get rewardsRedeemRequested => 'Prośba o realizację wysłana';
+
+  @override
+  String get rewardsRedeemRequestsTitle => 'Prośby o realizację';
+
+  @override
+  String get rewardsNoRedeemRequests => 'Brak próśb o realizację.';
+
+  @override
+  String get rewardsStatusActive => 'Aktywne';
+
+  @override
+  String get rewardsStatusPending => 'W trakcie weryfikacji';
+
+  @override
+  String get rewardsStatusUsed => 'Wykorzystane';
+
+  @override
+  String get rewardsStatusRejected => 'Odrzucone';
+
+  @override
+  String get rewardsNothingFound => 'Nic nie znaleziono';
+
+  @override
+  String get rewardsChanceInvalid => 'Szansa musi być w zakresie 0–100%.';
+
+  @override
+  String get rewardsChanceOverLimit => 'Suma szans nie może przekraczać 100%.';
 
   @override
   String rewardsCostPoints(Object cost) {
@@ -610,7 +813,7 @@ class AppLocalizationsPl extends AppLocalizations {
   String get rewardsDescriptionLabel => 'Opis';
 
   @override
-  String get rewardsWeightLabel => 'Waga';
+  String get rewardsWeightLabel => 'Szansa (%)';
 
   @override
   String get rewardsEnabledLabel => 'Aktywne';
@@ -619,7 +822,7 @@ class AppLocalizationsPl extends AppLocalizations {
   String get rewardsCostPointsLabel => 'Koszt punktów';
 
   @override
-  String get rewardsCooldownSecondsLabel => 'Cooldown (sekundy)';
+  String get rewardsCooldownSecondsLabel => 'Cooldown (dni)';
 
   @override
   String get rewardsMaxPerDayLabel => 'Maks. na dzień';

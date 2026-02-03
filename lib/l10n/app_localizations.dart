@@ -176,6 +176,12 @@ abstract class AppLocalizations {
   /// **'Copied'**
   String get commonCopied;
 
+  /// No description provided for @commonUnknown.
+  ///
+  /// In en, this message translates to:
+  /// **'Unknown'**
+  String get commonUnknown;
+
   /// No description provided for @commonPointsLabel.
   ///
   /// In en, this message translates to:
@@ -215,14 +221,26 @@ abstract class AppLocalizations {
   /// No description provided for @onboardingChooseRole.
   ///
   /// In en, this message translates to:
-  /// **'Choose your role'**
+  /// **'Create or join a household'**
   String get onboardingChooseRole;
 
   /// No description provided for @onboardingRoleSubtitle.
   ///
   /// In en, this message translates to:
-  /// **'Admins verify work. Members submit completions.'**
+  /// **'The creator becomes admin. Everyone else joins as a member.'**
   String get onboardingRoleSubtitle;
+
+  /// No description provided for @onboardingCreateHouseholdLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Create household'**
+  String get onboardingCreateHouseholdLabel;
+
+  /// No description provided for @onboardingJoinHouseholdLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Join household'**
+  String get onboardingJoinHouseholdLabel;
 
   /// No description provided for @onboardingYourName.
   ///
@@ -241,6 +259,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Share this code with members'**
   String get onboardingShareCode;
+
+  /// No description provided for @onboardingQrTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'QR code'**
+  String get onboardingQrTitle;
+
+  /// No description provided for @onboardingQrHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Scan this QR code to join the household.'**
+  String get onboardingQrHint;
 
   /// No description provided for @onboardingFinishSetup.
   ///
@@ -263,7 +293,7 @@ abstract class AppLocalizations {
   /// No description provided for @onboardingAdminCodeLabel.
   ///
   /// In en, this message translates to:
-  /// **'Enter admin code'**
+  /// **'Enter join code'**
   String get onboardingAdminCodeLabel;
 
   /// No description provided for @onboardingJoinHousehold.
@@ -343,6 +373,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Due items and approvals summary'**
   String get settingsDailyDigestSubtitle;
+
+  /// No description provided for @settingsDarkMode.
+  ///
+  /// In en, this message translates to:
+  /// **'Dark mode'**
+  String get settingsDarkMode;
+
+  /// No description provided for @settingsDarkModeSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Use dark theme'**
+  String get settingsDarkModeSubtitle;
 
   /// No description provided for @settingsLanguage.
   ///
@@ -500,6 +542,156 @@ abstract class AppLocalizations {
   /// **'No household to switch.'**
   String get settingsNoHouseholdToSwitch;
 
+  /// No description provided for @settingsProfilesTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Profiles'**
+  String get settingsProfilesTitle;
+
+  /// No description provided for @settingsProfilesNoActive.
+  ///
+  /// In en, this message translates to:
+  /// **'No active profile'**
+  String get settingsProfilesNoActive;
+
+  /// No description provided for @settingsProfilesAdd.
+  ///
+  /// In en, this message translates to:
+  /// **'Add profile'**
+  String get settingsProfilesAdd;
+
+  /// No description provided for @settingsProfilesSwitchTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Switch profile'**
+  String get settingsProfilesSwitchTitle;
+
+  /// No description provided for @settingsProfilesCreateTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Create profile'**
+  String get settingsProfilesCreateTitle;
+
+  /// No description provided for @settingsProfilesCreateAdmin.
+  ///
+  /// In en, this message translates to:
+  /// **'Create admin profile'**
+  String get settingsProfilesCreateAdmin;
+
+  /// No description provided for @settingsProfilesJoinHousehold.
+  ///
+  /// In en, this message translates to:
+  /// **'Join household'**
+  String get settingsProfilesJoinHousehold;
+
+  /// No description provided for @settingsProfilesDisplayName.
+  ///
+  /// In en, this message translates to:
+  /// **'Display name'**
+  String get settingsProfilesDisplayName;
+
+  /// No description provided for @profileNameRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Name is required.'**
+  String get profileNameRequired;
+
+  /// No description provided for @settingsProfilesHouseholdName.
+  ///
+  /// In en, this message translates to:
+  /// **'Household name'**
+  String get settingsProfilesHouseholdName;
+
+  /// No description provided for @settingsProfilesJoinCode.
+  ///
+  /// In en, this message translates to:
+  /// **'Household code'**
+  String get settingsProfilesJoinCode;
+
+  /// No description provided for @settingsProfilesCreate.
+  ///
+  /// In en, this message translates to:
+  /// **'Create'**
+  String get settingsProfilesCreate;
+
+  /// No description provided for @settingsProfilesCodeLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Join code'**
+  String get settingsProfilesCodeLabel;
+
+  /// No description provided for @settingsProfilesRenameTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Rename profile'**
+  String get settingsProfilesRenameTitle;
+
+  /// No description provided for @settingsProfilesFindNearby.
+  ///
+  /// In en, this message translates to:
+  /// **'Find nearby'**
+  String get settingsProfilesFindNearby;
+
+  /// No description provided for @settingsProfilesDiscoveryStatusTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Discovery status'**
+  String get settingsProfilesDiscoveryStatusTitle;
+
+  /// No description provided for @settingsProfilesDiscoveryLogTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Discovery log'**
+  String get settingsProfilesDiscoveryLogTitle;
+
+  /// No description provided for @settingsProfilesDiscoveryIdle.
+  ///
+  /// In en, this message translates to:
+  /// **'Idle'**
+  String get settingsProfilesDiscoveryIdle;
+
+  /// No description provided for @settingsProfilesDiscoveryStarting.
+  ///
+  /// In en, this message translates to:
+  /// **'Starting discovery...'**
+  String get settingsProfilesDiscoveryStarting;
+
+  /// No description provided for @settingsProfilesDiscoveryScanning.
+  ///
+  /// In en, this message translates to:
+  /// **'Scanning for nearby households...'**
+  String get settingsProfilesDiscoveryScanning;
+
+  /// No description provided for @settingsProfilesDiscoveryFinished.
+  ///
+  /// In en, this message translates to:
+  /// **'Discovery finished.'**
+  String get settingsProfilesDiscoveryFinished;
+
+  /// No description provided for @settingsProfilesDiscoveryNone.
+  ///
+  /// In en, this message translates to:
+  /// **'No nearby households found.'**
+  String get settingsProfilesDiscoveryNone;
+
+  /// No description provided for @settingsProfilesDiscoveryFound.
+  ///
+  /// In en, this message translates to:
+  /// **'Found {count} nearby households.'**
+  String settingsProfilesDiscoveryFound(int count);
+
+  /// No description provided for @settingsProfilesNoNearby.
+  ///
+  /// In en, this message translates to:
+  /// **'No nearby households found'**
+  String get settingsProfilesNoNearby;
+
+  /// No description provided for @settingsProfilesNearbyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Nearby households'**
+  String get settingsProfilesNearbyTitle;
+
   /// No description provided for @settingsDailyDigestScheduled.
   ///
   /// In en, this message translates to:
@@ -590,6 +782,60 @@ abstract class AppLocalizations {
   /// **'No history yet'**
   String get choresNoHistory;
 
+  /// No description provided for @choresUseAmulet.
+  ///
+  /// In en, this message translates to:
+  /// **'Use amulet'**
+  String get choresUseAmulet;
+
+  /// No description provided for @choresProtectionUntil.
+  ///
+  /// In en, this message translates to:
+  /// **'Protected until {date}'**
+  String choresProtectionUntil(Object date);
+
+  /// No description provided for @choresAmuletAlreadyUsed.
+  ///
+  /// In en, this message translates to:
+  /// **'Amulet already used for this chore.'**
+  String get choresAmuletAlreadyUsed;
+
+  /// No description provided for @choresAmuletAlreadyActive.
+  ///
+  /// In en, this message translates to:
+  /// **'Chore already protected.'**
+  String get choresAmuletAlreadyActive;
+
+  /// No description provided for @choresAmuletNone.
+  ///
+  /// In en, this message translates to:
+  /// **'No amulets available.'**
+  String get choresAmuletNone;
+
+  /// No description provided for @choresAmuletSelectTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Select an amulet'**
+  String get choresAmuletSelectTitle;
+
+  /// No description provided for @choresAmuletConfirmTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Use amulet?'**
+  String get choresAmuletConfirmTitle;
+
+  /// No description provided for @choresAmuletConfirmBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Use amulet on {chore}?'**
+  String choresAmuletConfirmBody(Object chore);
+
+  /// No description provided for @choresAmuletApplied.
+  ///
+  /// In en, this message translates to:
+  /// **'Amulet applied'**
+  String get choresAmuletApplied;
+
   /// No description provided for @choresNoteDialogTitle.
   ///
   /// In en, this message translates to:
@@ -635,7 +881,7 @@ abstract class AppLocalizations {
   /// No description provided for @choresRequestSubmitted.
   ///
   /// In en, this message translates to:
-  /// **'Request submitted'**
+  /// **'Submitted for review'**
   String get choresRequestSubmitted;
 
   /// No description provided for @choresMarkedCleaned.
@@ -752,11 +998,35 @@ abstract class AppLocalizations {
   /// **'Room or zone (optional)'**
   String get choreRoomLabel;
 
+  /// No description provided for @choreTypeLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Chore type'**
+  String get choreTypeLabel;
+
+  /// No description provided for @choreTypeSingular.
+  ///
+  /// In en, this message translates to:
+  /// **'Singular'**
+  String get choreTypeSingular;
+
+  /// No description provided for @choreTypeRecurring.
+  ///
+  /// In en, this message translates to:
+  /// **'Recurring'**
+  String get choreTypeRecurring;
+
   /// No description provided for @choreIntervalLabel.
   ///
   /// In en, this message translates to:
   /// **'Interval (days)'**
   String get choreIntervalLabel;
+
+  /// No description provided for @choreOverdueWeightLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Overdue weight (points/day)'**
+  String get choreOverdueWeightLabel;
 
   /// No description provided for @chorePointsLabel.
   ///
@@ -811,6 +1081,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Points must be a positive number.'**
   String get chorePointsPositive;
+
+  /// No description provided for @choreOverdueWeightInvalid.
+  ///
+  /// In en, this message translates to:
+  /// **'Overdue weight must be 0 or more.'**
+  String get choreOverdueWeightInvalid;
 
   /// No description provided for @approvalsTitle.
   ///
@@ -881,7 +1157,7 @@ abstract class AppLocalizations {
   /// No description provided for @statusPending.
   ///
   /// In en, this message translates to:
-  /// **'Pending'**
+  /// **'Under review'**
   String get statusPending;
 
   /// No description provided for @statusApproved.
@@ -989,7 +1265,7 @@ abstract class AppLocalizations {
   /// No description provided for @dashboardRewards.
   ///
   /// In en, this message translates to:
-  /// **'Rewards'**
+  /// **'Shop'**
   String get dashboardRewards;
 
   /// No description provided for @dashboardApprovals.
@@ -1031,7 +1307,7 @@ abstract class AppLocalizations {
   /// No description provided for @rewardsTitle.
   ///
   /// In en, this message translates to:
-  /// **'Rewards'**
+  /// **'Shop'**
   String get rewardsTitle;
 
   /// No description provided for @rewardsPointsBalance.
@@ -1085,7 +1361,7 @@ abstract class AppLocalizations {
   /// No description provided for @rewardsWeightStatus.
   ///
   /// In en, this message translates to:
-  /// **'Weight {weight} • {status}'**
+  /// **'Chance {weight}% • {status}'**
   String rewardsWeightStatus(Object weight, Object status);
 
   /// No description provided for @rewardsEnabled.
@@ -1130,17 +1406,53 @@ abstract class AppLocalizations {
   /// **'My rewards'**
   String get rewardsMyRewards;
 
-  /// No description provided for @rewardsAdminRewards.
+  /// No description provided for @shopItemsTitle.
   ///
   /// In en, this message translates to:
-  /// **'Admin rewards'**
-  String get rewardsAdminRewards;
+  /// **'Shop items'**
+  String get shopItemsTitle;
 
-  /// No description provided for @rewardsMemberRewards.
+  /// No description provided for @shopBuy.
   ///
   /// In en, this message translates to:
-  /// **'Member rewards'**
-  String get rewardsMemberRewards;
+  /// **'Buy'**
+  String get shopBuy;
+
+  /// No description provided for @shopPurchaseSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Added to inventory'**
+  String get shopPurchaseSuccess;
+
+  /// No description provided for @inventoryTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Inventory'**
+  String get inventoryTitle;
+
+  /// No description provided for @inventoryEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No items yet.'**
+  String get inventoryEmpty;
+
+  /// No description provided for @inventoryUseFromChore.
+  ///
+  /// In en, this message translates to:
+  /// **'Use from a chore menu'**
+  String get inventoryUseFromChore;
+
+  /// No description provided for @amuletLossProtection.
+  ///
+  /// In en, this message translates to:
+  /// **'Amulet of loss protection ({hours}h)'**
+  String amuletLossProtection(Object hours);
+
+  /// No description provided for @amuletDurationLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Pauses overdue for {hours} hours'**
+  String amuletDurationLabel(Object hours);
 
   /// No description provided for @rewardsNoRedemptions.
   ///
@@ -1148,23 +1460,89 @@ abstract class AppLocalizations {
   /// **'No redemptions yet.'**
   String get rewardsNoRedemptions;
 
-  /// No description provided for @rewardsNoAdminRewards.
-  ///
-  /// In en, this message translates to:
-  /// **'No admin rewards yet.'**
-  String get rewardsNoAdminRewards;
-
-  /// No description provided for @rewardsNoMemberRewards.
-  ///
-  /// In en, this message translates to:
-  /// **'No member rewards yet.'**
-  String get rewardsNoMemberRewards;
-
   /// No description provided for @rewardsViewAll.
   ///
   /// In en, this message translates to:
   /// **'View all'**
   String get rewardsViewAll;
+
+  /// No description provided for @rewardsFilterLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Filter'**
+  String get rewardsFilterLabel;
+
+  /// No description provided for @rewardsFilterAll.
+  ///
+  /// In en, this message translates to:
+  /// **'All'**
+  String get rewardsFilterAll;
+
+  /// No description provided for @rewardsRedeem.
+  ///
+  /// In en, this message translates to:
+  /// **'Redeem'**
+  String get rewardsRedeem;
+
+  /// No description provided for @rewardsRedeemRequested.
+  ///
+  /// In en, this message translates to:
+  /// **'Redemption requested'**
+  String get rewardsRedeemRequested;
+
+  /// No description provided for @rewardsRedeemRequestsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Redemption requests'**
+  String get rewardsRedeemRequestsTitle;
+
+  /// No description provided for @rewardsNoRedeemRequests.
+  ///
+  /// In en, this message translates to:
+  /// **'No redemption requests.'**
+  String get rewardsNoRedeemRequests;
+
+  /// No description provided for @rewardsStatusActive.
+  ///
+  /// In en, this message translates to:
+  /// **'Active'**
+  String get rewardsStatusActive;
+
+  /// No description provided for @rewardsStatusPending.
+  ///
+  /// In en, this message translates to:
+  /// **'Under review'**
+  String get rewardsStatusPending;
+
+  /// No description provided for @rewardsStatusUsed.
+  ///
+  /// In en, this message translates to:
+  /// **'Used'**
+  String get rewardsStatusUsed;
+
+  /// No description provided for @rewardsStatusRejected.
+  ///
+  /// In en, this message translates to:
+  /// **'Rejected'**
+  String get rewardsStatusRejected;
+
+  /// No description provided for @rewardsNothingFound.
+  ///
+  /// In en, this message translates to:
+  /// **'Nothing found'**
+  String get rewardsNothingFound;
+
+  /// No description provided for @rewardsChanceInvalid.
+  ///
+  /// In en, this message translates to:
+  /// **'Chance must be between 0 and 100%.'**
+  String get rewardsChanceInvalid;
+
+  /// No description provided for @rewardsChanceOverLimit.
+  ///
+  /// In en, this message translates to:
+  /// **'Total chance cannot exceed 100%.'**
+  String get rewardsChanceOverLimit;
 
   /// No description provided for @rewardsCostPoints.
   ///
@@ -1217,7 +1595,7 @@ abstract class AppLocalizations {
   /// No description provided for @rewardsWeightLabel.
   ///
   /// In en, this message translates to:
-  /// **'Weight'**
+  /// **'Chance (%)'**
   String get rewardsWeightLabel;
 
   /// No description provided for @rewardsEnabledLabel.
@@ -1235,7 +1613,7 @@ abstract class AppLocalizations {
   /// No description provided for @rewardsCooldownSecondsLabel.
   ///
   /// In en, this message translates to:
-  /// **'Cooldown seconds'**
+  /// **'Cooldown (days)'**
   String get rewardsCooldownSecondsLabel;
 
   /// No description provided for @rewardsMaxPerDayLabel.

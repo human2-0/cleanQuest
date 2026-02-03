@@ -3,16 +3,23 @@ import 'dart:async';
 import 'package:hive/hive.dart';
 
 import '../../../data/hive/hive_boxes.dart';
+import '../../../core/sync/sync_coordinator.dart';
+import '../../../core/sync/sync_models.dart';
+import '../../../core/sync/sync_payloads.dart';
 import '../domain/redemption.dart';
 import 'redemption_dto.dart';
 
 class RedemptionsRepository {
-  RedemptionsRepository(this._box);
+  RedemptionsRepository(this._box, {SyncCoordinator? sync}) : _sync = sync;
 
   final Box<RedemptionDto> _box;
+  final SyncCoordinator? _sync;
 
-  static RedemptionsRepository open() {
-    return RedemptionsRepository(Hive.box<RedemptionDto>(redemptionsBoxName));
+  static RedemptionsRepository open({SyncCoordinator? sync}) {
+    return RedemptionsRepository(
+      Hive.box<RedemptionDto>(redemptionsBoxName),
+      sync: sync,
+    );
   }
 
   Stream<List<Redemption>> watchRedemptions(String householdId, String userId) async* {
@@ -29,8 +36,18 @@ class RedemptionsRepository {
     }
   }
 
-  Future<void> addRedemption(Redemption redemption) {
-    return _box.put(redemption.id, RedemptionDto.fromDomain(redemption));
+  Future<void> addRedemption(Redemption redemption) async {
+    await upsertRedemption(redemption);
+  }
+
+  Future<void> upsertRedemption(Redemption redemption) async {
+    final dto = RedemptionDto.fromDomain(redemption);
+    await _box.put(redemption.id, dto);
+    await _sync?.publishUpsert(
+      SyncEntityType.redemptions,
+      SyncPayloadCodec.redemptionToMap(dto),
+      entityId: redemption.id,
+    );
   }
 
   List<Redemption> _redemptionsFor(String householdId, String userId) {

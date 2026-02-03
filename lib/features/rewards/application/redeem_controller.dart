@@ -10,6 +10,7 @@ import '../data/redemptions_repository.dart';
 import '../data/rewards_repository.dart';
 import '../domain/box_rule.dart';
 import '../domain/redemption.dart';
+import '../domain/redemption_status.dart';
 import '../domain/reward.dart';
 import '../domain/weighted_picker.dart';
 
@@ -58,6 +59,9 @@ class RedeemController {
     final rewards = await _loadRewards(householdId, boxRule);
     final reward = _picker.pick(rewards);
     final now = DateTime.now();
+    final rewardId = reward?.id ?? noRewardId;
+    final status =
+        reward == null ? RedemptionStatus.used : RedemptionStatus.active;
     final redemption = Redemption(
       id: _newId(),
       householdId: householdId,
@@ -65,8 +69,9 @@ class RedeemController {
       boxRuleId: boxRule.id,
       costPoints: boxRule.costPoints,
       rolledAt: now,
-      outcomeRewardId: reward.id,
+      outcomeRewardId: rewardId,
       rngVersion: 'v1',
+      status: status,
     );
     await _redemptionsRepository.addRedemption(redemption);
     await _ledgerRepository.addEntry(
@@ -82,13 +87,53 @@ class RedeemController {
     );
     if (_notificationsEnabled) {
       final label = userLabel ?? userId;
+      final rewardTitle = reward?.title ?? _localizations.rewardsNothingFound;
       await _notifications.show(
         id: DateTime.now().millisecondsSinceEpoch % 100000,
         title: _localizations.notificationRewardTitle,
-        body: _localizations.notificationRewardBody(label, reward.title),
+        body: _localizations.notificationRewardBody(label, rewardTitle),
       );
     }
     return redemption;
+  }
+
+  Future<Redemption> requestRedemption({
+    required Redemption redemption,
+  }) async {
+    final updated = redemption.copyWith(
+      status: RedemptionStatus.pending,
+      requestedAt: DateTime.now(),
+      reviewedAt: null,
+      reviewedByUserId: null,
+    );
+    await _redemptionsRepository.upsertRedemption(updated);
+    return updated;
+  }
+
+  Future<Redemption> approveRedemption({
+    required Redemption redemption,
+    required String reviewedByUserId,
+  }) async {
+    final updated = redemption.copyWith(
+      status: RedemptionStatus.used,
+      reviewedAt: DateTime.now(),
+      reviewedByUserId: reviewedByUserId,
+    );
+    await _redemptionsRepository.upsertRedemption(updated);
+    return updated;
+  }
+
+  Future<Redemption> rejectRedemption({
+    required Redemption redemption,
+    required String reviewedByUserId,
+  }) async {
+    final updated = redemption.copyWith(
+      status: RedemptionStatus.rejected,
+      reviewedAt: DateTime.now(),
+      reviewedByUserId: reviewedByUserId,
+    );
+    await _redemptionsRepository.upsertRedemption(updated);
+    return updated;
   }
 
   Future<List<Reward>> _loadRewards(String householdId, BoxRule rule) async {

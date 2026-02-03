@@ -6,6 +6,7 @@ import '../../../core/app_config/app_config_providers.dart';
 import '../../../core/localization/localization_providers.dart';
 import '../../../core/notifications/notification_service.dart';
 import '../../points/application/points_providers.dart';
+import '../../../core/sync/sync_providers.dart';
 import '../data/completion_requests_repository.dart';
 import '../domain/completion_request.dart';
 import '../domain/request_status.dart';
@@ -13,7 +14,9 @@ import 'completion_requests_controller.dart';
 
 final completionRequestsRepositoryProvider =
     Provider<CompletionRequestsRepository>((ref) {
-  return CompletionRequestsRepository.open();
+  return CompletionRequestsRepository.open(
+    sync: ref.read(syncCoordinatorProvider),
+  );
 });
 
 final completionRequestsControllerProvider =

@@ -4,4 +4,6 @@ enum LedgerReason {
   redemptionCost,
   refund,
   adminApprovalReward,
+  overduePenalty,
+  inventoryPurchase,
 }

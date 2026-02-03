@@ -4,12 +4,14 @@ import '../domain/completion_event.dart';
 import '../domain/item.dart';
 import '../domain/item_status.dart';
 import '../domain/item_status_rules.dart';
+import '../domain/item_type.dart';
 import '../data/items_repository.dart';
 import '../data/completion_events_repository.dart';
 import '../../points/application/points_providers.dart';
 import 'item_board_entry.dart';
 import 'items_controller.dart';
 import '../../../core/app_config/app_config_providers.dart';
+import '../../../core/sync/sync_providers.dart';
 
 const demoHouseholdId = 'household-demo';
 
@@ -19,12 +21,12 @@ final activeHouseholdIdProvider = Provider<String>((ref) {
 });
 
 final itemsRepositoryProvider = Provider<ItemsRepository>((ref) {
-  return ItemsRepository.open();
+  return ItemsRepository.open(sync: ref.read(syncCoordinatorProvider));
 });
 
 final completionEventsRepositoryProvider =
     Provider<CompletionEventsRepository>((ref) {
-  return CompletionEventsRepository.open();
+  return CompletionEventsRepository.open(sync: ref.read(syncCoordinatorProvider));
 });
 
 final itemsControllerProvider = Provider<ItemsController>((ref) {
@@ -60,9 +62,10 @@ final itemsBoardProvider = Provider<List<ItemBoardEntry>>((ref) {
       now: now,
       lastApprovedAt: lastApprovedAt,
     );
-    final nextDueAt = lastApprovedAt == null
-        ? null
-        : lastApprovedAt.add(Duration(seconds: item.intervalSeconds));
+    final nextDueAt =
+        item.type == ItemType.recurring && lastApprovedAt != null
+            ? lastApprovedAt.add(Duration(seconds: item.intervalSeconds))
+            : null;
 
     return ItemBoardEntry(
       item: item,

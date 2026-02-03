@@ -6,24 +6,31 @@ import '../../../core/notifications/notification_service.dart';
 import '../../../core/localization/localization_providers.dart';
 import '../../items/application/items_providers.dart';
 import '../../points/application/points_providers.dart';
+import '../../../core/sync/sync_providers.dart';
 import '../data/box_rules_repository.dart';
+import '../data/inventory_repository.dart';
 import '../data/redemptions_repository.dart';
 import '../data/rewards_repository.dart';
 import '../domain/box_rule.dart';
+import '../domain/inventory_item.dart';
 import '../domain/redemption.dart';
 import '../domain/reward.dart';
 import 'redeem_controller.dart';
 
 final rewardsRepositoryProvider = Provider<RewardsRepository>((ref) {
-  return RewardsRepository.open();
+  return RewardsRepository.open(sync: ref.read(syncCoordinatorProvider));
 });
 
 final boxRulesRepositoryProvider = Provider<BoxRulesRepository>((ref) {
-  return BoxRulesRepository.open();
+  return BoxRulesRepository.open(sync: ref.read(syncCoordinatorProvider));
 });
 
 final redemptionsRepositoryProvider = Provider<RedemptionsRepository>((ref) {
-  return RedemptionsRepository.open();
+  return RedemptionsRepository.open(sync: ref.read(syncCoordinatorProvider));
+});
+
+final inventoryRepositoryProvider = Provider<InventoryRepository>((ref) {
+  return InventoryRepository.open(sync: ref.read(syncCoordinatorProvider));
 });
 
 final rewardsProvider = StreamProvider<List<Reward>>((ref) {
@@ -57,6 +64,19 @@ final householdRedemptionsProvider = StreamProvider<List<Redemption>>((ref) {
       .map((redemptions) {
     final sorted = [...redemptions];
     sorted.sort((a, b) => b.rolledAt.compareTo(a.rolledAt));
+    return sorted;
+  });
+});
+
+final inventoryProvider = StreamProvider<List<InventoryItem>>((ref) {
+  final householdId = ref.watch(activeHouseholdIdProvider);
+  final userId = ref.watch(currentUserIdProvider);
+  return ref
+      .read(inventoryRepositoryProvider)
+      .watchInventory(householdId, userId)
+      .map((items) {
+    final sorted = [...items];
+    sorted.sort((a, b) => b.purchasedAt.compareTo(a.purchasedAt));
     return sorted;
   });
 });

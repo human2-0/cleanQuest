@@ -4,6 +4,7 @@ import '../../items/domain/completion_event.dart';
 import '../../points/data/ledger_repository.dart';
 import '../../points/domain/ledger_entry.dart';
 import '../../points/domain/ledger_reason.dart';
+import '../../items/domain/item.dart';
 import '../../../core/notifications/notification_service.dart';
 import '../../../l10n/app_localizations.dart';
 import '../data/completion_requests_repository.dart';
@@ -29,17 +30,18 @@ class CompletionRequestsController {
   final bool _notificationsEnabled;
   final AppLocalizations _localizations;
 
-  Future<void> submitRequest({
+  Future<CompletionRequest> submitRequest({
     required String householdId,
     required String itemId,
     required String submittedByUserId,
     required bool isAdmin,
     String? itemName,
     String? note,
-  }) {
+  }) async {
     if (isAdmin) {
       throw StateError(_localizations.errorAdminsCannotSubmit);
     }
+    await _requestsRepository.ensureConnected();
     final request = CompletionRequest(
       id: DateTime.now().microsecondsSinceEpoch.toString(),
       householdId: householdId,
@@ -49,15 +51,15 @@ class CompletionRequestsController {
       status: RequestStatus.pending,
       note: note,
     );
-    return _requestsRepository.upsertRequest(request).then((_) async {
-      if (_notificationsEnabled) {
-        await _notifications.show(
-          id: DateTime.now().millisecondsSinceEpoch % 100000,
-          title: _localizations.notificationNewApprovalTitle,
-          body: itemName ?? _localizations.notificationNewApprovalBody,
-        );
-      }
-    });
+    await _requestsRepository.upsertRequest(request);
+    if (_notificationsEnabled) {
+      await _notifications.show(
+        id: DateTime.now().millisecondsSinceEpoch % 100000,
+        title: _localizations.notificationNewApprovalTitle,
+        body: itemName ?? _localizations.notificationNewApprovalBody,
+      );
+    }
+    return request;
   }
 
   Future<void> approveRequest({
@@ -83,29 +85,46 @@ class CompletionRequestsController {
         approvedAt: DateTime.now(),
       ),
     );
-    final points = _itemsRepository.getItem(request.itemId)?.points ?? 10;
+    final item = _itemsRepository.getItem(request.itemId);
+    final points = item?.points ?? 10;
+    final penalty = _overduePenaltyPoints(
+      item: item,
+      request: request,
+    );
+    final memberPoints = (points - penalty).clamp(0, points);
     await _ledgerRepository.addEntry(
       LedgerEntry(
         id: DateTime.now().microsecondsSinceEpoch.toString(),
         householdId: request.householdId,
         userId: request.submittedByUserId,
-        delta: points,
+        delta: memberPoints,
         createdAt: DateTime.now(),
         reason: LedgerReason.choreApproved,
         relatedRequestId: request.id,
       ),
     );
-    await _ledgerRepository.addEntry(
-      LedgerEntry(
-        id: DateTime.now().microsecondsSinceEpoch.toString(),
-        householdId: request.householdId,
-        userId: reviewedByUserId,
-        delta: points,
-        createdAt: DateTime.now(),
-        reason: LedgerReason.adminApprovalReward,
-        relatedRequestId: request.id,
-      ),
-    );
+    if (penalty > 0) {
+      await _ledgerRepository.addEntry(
+        LedgerEntry(
+          id: DateTime.now().microsecondsSinceEpoch.toString(),
+          householdId: request.householdId,
+          userId: reviewedByUserId,
+          delta: penalty,
+          createdAt: DateTime.now(),
+          reason: LedgerReason.overduePenalty,
+          relatedRequestId: request.id,
+        ),
+      );
+    }
+    if (item != null &&
+        (item.protectionUntil != null || item.protectionUsed)) {
+      await _itemsRepository.upsertItem(
+        item.copyWith(
+          protectionUntil: null,
+          protectionUsed: false,
+        ),
+      );
+    }
     if (_notificationsEnabled) {
       await _notifications.show(
         id: DateTime.now().millisecondsSinceEpoch % 100000,
@@ -138,5 +157,39 @@ class CompletionRequestsController {
         );
       }
     });
+  }
+
+  int _overduePenaltyPoints({
+    required Item? item,
+    required CompletionRequest request,
+  }) {
+    if (item == null || item.overdueWeight <= 0) {
+      return 0;
+    }
+    if (item.intervalSeconds <= 0) {
+      return 0;
+    }
+    final lastApprovedAt =
+        _eventsRepository.latestApprovedAt(request.householdId, request.itemId);
+    if (lastApprovedAt == null) {
+      return 0;
+    }
+    final dueAt =
+        lastApprovedAt.add(Duration(seconds: item.intervalSeconds));
+    var penaltyStartAt = dueAt;
+    if (item.protectionUntil != null) {
+      final graceStart =
+          item.protectionUntil!.add(const Duration(hours: 1));
+      if (graceStart.isAfter(penaltyStartAt)) {
+        penaltyStartAt = graceStart;
+      }
+    }
+    final overdueDays =
+        request.submittedAt.difference(penaltyStartAt).inDays;
+    if (overdueDays <= 0) {
+      return 0;
+    }
+    final penalty = item.overdueWeight * overdueDays;
+    return penalty > item.points ? item.points : penalty;
   }
 }

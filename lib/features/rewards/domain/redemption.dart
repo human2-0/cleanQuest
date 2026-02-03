@@ -1,3 +1,7 @@
+import 'redemption_status.dart';
+
+const String noRewardId = 'reward-none';
+
 class Redemption {
   const Redemption({
     required this.id,
@@ -8,6 +12,10 @@ class Redemption {
     required this.rolledAt,
     required this.outcomeRewardId,
     required this.rngVersion,
+    required this.status,
+    this.requestedAt,
+    this.reviewedAt,
+    this.reviewedByUserId,
   });
 
   final String id;
@@ -18,4 +26,30 @@ class Redemption {
   final DateTime rolledAt;
   final String outcomeRewardId;
   final String rngVersion;
+  final RedemptionStatus status;
+  final DateTime? requestedAt;
+  final DateTime? reviewedAt;
+  final String? reviewedByUserId;
+
+  Redemption copyWith({
+    RedemptionStatus? status,
+    DateTime? requestedAt,
+    DateTime? reviewedAt,
+    String? reviewedByUserId,
+  }) {
+    return Redemption(
+      id: id,
+      householdId: householdId,
+      userId: userId,
+      boxRuleId: boxRuleId,
+      costPoints: costPoints,
+      rolledAt: rolledAt,
+      outcomeRewardId: outcomeRewardId,
+      rngVersion: rngVersion,
+      status: status ?? this.status,
+      requestedAt: requestedAt ?? this.requestedAt,
+      reviewedAt: reviewedAt ?? this.reviewedAt,
+      reviewedByUserId: reviewedByUserId ?? this.reviewedByUserId,
+    );
+  }
 }

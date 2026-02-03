@@ -60,6 +60,7 @@ List<Item> _defaultItems(String householdId) {
       icon: '🧽',
       intervalSeconds: 60 * 60 * 24 * 3,
       points: 10,
+      overdueWeight: 2,
     ),
     Item(
       id: 'item-living-vacuum',
@@ -70,6 +71,7 @@ List<Item> _defaultItems(String householdId) {
       icon: '🧹',
       intervalSeconds: 60 * 60 * 24 * 7,
       points: 12,
+      overdueWeight: 2,
     ),
     Item(
       id: 'item-bath-mirror',
@@ -80,6 +82,7 @@ List<Item> _defaultItems(String householdId) {
       icon: '🪞',
       intervalSeconds: 60 * 60 * 24 * 5,
       points: 8,
+      overdueWeight: 1,
     ),
     Item(
       id: 'item-car-exterior',
@@ -90,6 +93,7 @@ List<Item> _defaultItems(String householdId) {
       icon: '🚗',
       intervalSeconds: 60 * 60 * 24 * 14,
       points: 20,
+      overdueWeight: 3,
     ),
     Item(
       id: 'item-car-interior',
@@ -100,6 +104,7 @@ List<Item> _defaultItems(String householdId) {
       icon: '🧼',
       intervalSeconds: 60 * 60 * 24 * 10,
       points: 14,
+      overdueWeight: 2,
     ),
     Item(
       id: 'item-garage-floor',
@@ -110,6 +115,7 @@ List<Item> _defaultItems(String householdId) {
       icon: '🧽',
       intervalSeconds: 60 * 60 * 24 * 30,
       points: 15,
+      overdueWeight: 2,
       isPaused: true,
     ),
     Item(
@@ -121,6 +127,7 @@ List<Item> _defaultItems(String householdId) {
       icon: '🪟',
       intervalSeconds: 60 * 60 * 24 * 21,
       points: 18,
+      overdueWeight: 2,
       snoozedUntil: DateTime.now().add(const Duration(days: 2)),
     ),
   ];

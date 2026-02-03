@@ -1,0 +1,4 @@
+enum ItemType {
+  singular,
+  recurring,
+}

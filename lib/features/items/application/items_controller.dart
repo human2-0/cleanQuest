@@ -56,9 +56,17 @@ class ItemsController {
         reason: LedgerReason.choreApproved,
       ),
     );
-    if (item.isPaused || item.snoozedUntil != null) {
+    if (item.isPaused ||
+        item.snoozedUntil != null ||
+        item.protectionUntil != null ||
+        item.protectionUsed) {
       await _repository.upsertItem(
-        item.copyWith(isPaused: false, snoozedUntil: null),
+        item.copyWith(
+          isPaused: false,
+          snoozedUntil: null,
+          protectionUntil: null,
+          protectionUsed: false,
+        ),
       );
     }
   }

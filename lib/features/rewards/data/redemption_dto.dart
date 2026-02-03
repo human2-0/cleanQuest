@@ -1,6 +1,7 @@
 import 'package:hive/hive.dart';
 
 import '../domain/redemption.dart';
+import '../domain/redemption_status.dart';
 
 class RedemptionDto {
   RedemptionDto({
@@ -12,6 +13,10 @@ class RedemptionDto {
     required this.rolledAt,
     required this.outcomeRewardId,
     required this.rngVersion,
+    required this.statusIndex,
+    this.requestedAt,
+    this.reviewedAt,
+    this.reviewedByUserId,
   });
 
   final String id;
@@ -22,6 +27,10 @@ class RedemptionDto {
   final DateTime rolledAt;
   final String outcomeRewardId;
   final String rngVersion;
+  final int statusIndex;
+  final DateTime? requestedAt;
+  final DateTime? reviewedAt;
+  final String? reviewedByUserId;
 
   Redemption toDomain() {
     return Redemption(
@@ -33,6 +42,10 @@ class RedemptionDto {
       rolledAt: rolledAt,
       outcomeRewardId: outcomeRewardId,
       rngVersion: rngVersion,
+      status: RedemptionStatus.values[statusIndex],
+      requestedAt: requestedAt,
+      reviewedAt: reviewedAt,
+      reviewedByUserId: reviewedByUserId,
     );
   }
 
@@ -46,6 +59,10 @@ class RedemptionDto {
       rolledAt: redemption.rolledAt,
       outcomeRewardId: redemption.outcomeRewardId,
       rngVersion: redemption.rngVersion,
+      statusIndex: redemption.status.index,
+      requestedAt: redemption.requestedAt,
+      reviewedAt: redemption.reviewedAt,
+      reviewedByUserId: redemption.reviewedByUserId,
     );
   }
 }
@@ -71,13 +88,18 @@ class RedemptionDtoAdapter extends TypeAdapter<RedemptionDto> {
       rolledAt: fields[5] as DateTime,
       outcomeRewardId: fields[6] as String,
       rngVersion: fields[7] as String,
+      statusIndex:
+          fields[8] as int? ?? RedemptionStatus.active.index,
+      requestedAt: fields[9] as DateTime?,
+      reviewedAt: fields[10] as DateTime?,
+      reviewedByUserId: fields[11] as String?,
     );
   }
 
   @override
   void write(BinaryWriter writer, RedemptionDto obj) {
     writer
-      ..writeByte(8)
+      ..writeByte(12)
       ..writeByte(0)
       ..write(obj.id)
       ..writeByte(1)
@@ -93,6 +115,14 @@ class RedemptionDtoAdapter extends TypeAdapter<RedemptionDto> {
       ..writeByte(6)
       ..write(obj.outcomeRewardId)
       ..writeByte(7)
-      ..write(obj.rngVersion);
+      ..write(obj.rngVersion)
+      ..writeByte(8)
+      ..write(obj.statusIndex)
+      ..writeByte(9)
+      ..write(obj.requestedAt)
+      ..writeByte(10)
+      ..write(obj.reviewedAt)
+      ..writeByte(11)
+      ..write(obj.reviewedByUserId);
   }
 }

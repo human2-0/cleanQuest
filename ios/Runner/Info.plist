@@ -24,6 +24,14 @@
 	<string>$(FLUTTER_BUILD_NUMBER)</string>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
+	<key>NSBonjourServices</key>
+	<array>
+		<string>_cleanquest._tcp</string>
+	</array>
+	<key>NSLocalNetworkUsageDescription</key>
+	<string>Discover and sync with other Clean Quest devices on your local network.</string>
+	<key>NSBluetoothAlwaysUsageDescription</key>
+	<string>Discover nearby devices for household setup.</string>
 	<key>UILaunchStoryboardName</key>
 	<string>LaunchScreen</string>
 	<key>UIMainStoryboardFile</key>

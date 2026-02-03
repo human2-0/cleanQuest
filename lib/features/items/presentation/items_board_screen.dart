@@ -4,22 +4,49 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/localization/localized_labels.dart';
 import '../../../core/utils/date_format.dart';
 import '../../../core/providers/user_providers.dart';
+import '../../../core/sync/sync_models.dart';
+import '../../../core/sync/sync_providers.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../approvals/application/approvals_providers.dart';
 import '../../approvals/presentation/approvals_screen.dart';
+import '../../approvals/domain/request_status.dart';
+import '../../rewards/application/rewards_providers.dart';
+import '../../rewards/data/inventory_repository.dart';
+import '../../rewards/domain/inventory_item.dart';
+import '../../rewards/domain/inventory_item_type.dart';
 import '../application/item_board_entry.dart';
 import '../application/items_providers.dart';
+import '../domain/item.dart';
 import '../domain/item_status.dart';
 import 'item_detail_screen.dart';
 import '../../points/application/points_providers.dart';
 
-class ItemsBoardScreen extends ConsumerWidget {
+class ItemsBoardScreen extends ConsumerStatefulWidget {
   const ItemsBoardScreen({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<ItemsBoardScreen> createState() => _ItemsBoardScreenState();
+}
+
+class _ItemsBoardScreenState extends ConsumerState<ItemsBoardScreen> {
+  String? _selectedRoom;
+  final Set<String> _submittingRequests = {};
+
+  @override
+  Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     final entries = ref.watch(itemsBoardProvider);
+    final roomOptions = _roomOptions(entries);
+    final effectiveRoom =
+        _selectedRoom != null && roomOptions.contains(_selectedRoom)
+            ? _selectedRoom
+            : null;
+    final filteredEntries = effectiveRoom == null
+        ? entries
+        : entries
+            .where((entry) =>
+                _normalizeRoom(entry.item.roomOrZone) == effectiveRoom)
+            .toList();
     final householdId = ref.read(activeHouseholdIdProvider);
     final role = ref.watch(currentUserRoleProvider);
     final userId = ref.read(currentUserIdProvider);
@@ -28,6 +55,12 @@ class ItemsBoardScreen extends ConsumerWidget {
     final isAdmin = role == UserRole.admin;
     final balance = ref.watch(pointsBalanceProvider);
     final pendingCount = ref.watch(pendingRequestsProvider).length;
+    final myRequests = ref.watch(myRequestsProvider);
+    final inventory = ref.watch(inventoryProvider).value ?? <InventoryItem>[];
+    final pendingByItemId = {
+      for (final request in myRequests)
+        if (request.status == RequestStatus.pending) request.itemId,
+    };
     return Scaffold(
       appBar: AppBar(
         title: Row(
@@ -77,163 +110,307 @@ class ItemsBoardScreen extends ConsumerWidget {
           ),
         ],
       ),
-      body: ListView.separated(
-        padding: const EdgeInsets.all(16),
-        itemCount: entries.length,
-        separatorBuilder: (_, __) => const SizedBox(height: 12),
-        itemBuilder: (context, index) {
-          final entry = entries[index];
-          return InkWell(
-            borderRadius: BorderRadius.circular(12),
-            onTap: () {
-              Navigator.of(context).push(
-                MaterialPageRoute(
-                  builder: (_) => ItemDetailScreen(
-                    itemId: entry.item.id,
-                    readOnly: role == UserRole.member,
-                  ),
-                ),
-              );
-            },
-            child: _ItemBoardCard(
-              entry: entry,
-              showAction: role == UserRole.member,
-              showAdminHint: isAdmin,
-              showAdminActions: isAdmin,
-              actionLabel: l10n.choresRequestCompletion,
-              onAction: () {
-                _promptForNote(context).then((note) {
-                  if (note == null) {
-                    return;
-                  }
-                  requestsController
-                      .submitRequest(
-                        householdId: householdId,
-                        itemId: entry.item.id,
-                        submittedByUserId: userId,
-                        isAdmin: role == UserRole.admin,
-                        itemName: entry.item.name,
-                        note: note.isEmpty ? null : note,
-                      )
-                      .then((_) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text(l10n.choresRequestSubmitted)),
-                    );
-                  }).catchError((error) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text(error.toString())),
-                    );
-                  });
-                });
+      body: Column(
+        children: [
+          if (roomOptions.isNotEmpty)
+            _FilterBar(
+              options: roomOptions,
+              selected: effectiveRoom,
+              onSelected: (value) {
+                setState(() => _selectedRoom = value);
               },
-              onCleanNow: isAdmin
-                  ? () async {
-                      try {
-                        await itemsController.markCleanedNow(
-                          item: entry.item,
-                          userId: userId,
-                        );
-                        if (!context.mounted) {
-                          return;
-                        }
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(content: Text(l10n.choresMarkedCleaned)),
-                        );
-                      } catch (error) {
-                        if (!context.mounted) {
-                          return;
-                        }
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(content: Text(error.toString())),
-                        );
-                      }
-                    }
-                  : null,
-              onSnooze: isAdmin
-                  ? () async {
-                      final until = await _pickSnoozeUntil(context);
-                      if (until == null) {
-                        return;
-                      }
-                      try {
-                        await itemsController.snoozeItem(entry.item, until);
-                        if (!context.mounted) {
-                          return;
-                        }
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            content: Text(
-                              l10n.choresSnoozedUntilToast(
-                                formatShortDate(until),
-                              ),
-                            ),
-                          ),
-                        );
-                      } catch (error) {
-                        if (!context.mounted) {
-                          return;
-                        }
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(content: Text(error.toString())),
-                        );
-                      }
-                    }
-                  : null,
-              onClearSnooze: isAdmin
-                  ? () async {
-                      try {
-                        await itemsController.clearSnooze(entry.item);
-                        if (!context.mounted) {
-                          return;
-                        }
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(content: Text(l10n.choresSnoozeCleared)),
-                        );
-                      } catch (error) {
-                        if (!context.mounted) {
-                          return;
-                        }
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(content: Text(error.toString())),
-                        );
-                      }
-                    }
-                  : null,
-              onTogglePause: isAdmin
-                  ? () async {
-                      try {
-                        await itemsController.setPaused(
-                          entry.item,
-                          !entry.item.isPaused,
-                        );
-                        if (!context.mounted) {
-                          return;
-                        }
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            content: Text(
-                              entry.item.isPaused
-                                  ? l10n.choresResumedToast
-                                  : l10n.choresPausedToast,
-                            ),
-                          ),
-                        );
-                      } catch (error) {
-                        if (!context.mounted) {
-                          return;
-                        }
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(content: Text(error.toString())),
-                        );
-                      }
-                    }
-                  : null,
             ),
-          );
-        },
+          Expanded(
+            child: ListView.separated(
+              padding: const EdgeInsets.all(16),
+              itemCount: filteredEntries.length,
+              separatorBuilder: (_, __) => const SizedBox(height: 12),
+              itemBuilder: (context, index) {
+                final entry = filteredEntries[index];
+                final isSubmitting =
+                    _submittingRequests.contains(entry.item.id);
+                return InkWell(
+                  borderRadius: BorderRadius.circular(12),
+                  onTap: () {
+                    Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder: (_) => ItemDetailScreen(
+                          itemId: entry.item.id,
+                          readOnly: role == UserRole.member,
+                        ),
+                      ),
+                    );
+                  },
+                  child: _ItemBoardCard(
+                    entry: entry,
+                    showAction: role == UserRole.member,
+                    showAdminHint: isAdmin,
+                    showAdminActions: isAdmin,
+                    menu: role == UserRole.member
+                        ? PopupMenuButton<_ChoreAction>(
+                            icon: const Icon(Icons.more_horiz),
+                            onSelected: (action) {
+                              if (action == _ChoreAction.useAmulet) {
+                                _showAmuletPicker(
+                                  context: context,
+                                  ref: ref,
+                                  item: entry.item,
+                                  inventory: inventory,
+                                );
+                              }
+                            },
+                            itemBuilder: (context) => [
+                              PopupMenuItem(
+                                value: _ChoreAction.useAmulet,
+                                child: Text(l10n.choresUseAmulet),
+                              ),
+                            ],
+                          )
+                        : null,
+                    underReview: pendingByItemId.contains(entry.item.id),
+                    actionLabel: pendingByItemId.contains(entry.item.id)
+                        ? l10n.statusPending
+                        : l10n.choresRequestCompletion,
+                    actionIcon: isSubmitting
+                        ? const SizedBox(
+                            width: 16,
+                            height: 16,
+                            child: CircularProgressIndicator(strokeWidth: 2),
+                          )
+                        : const Icon(Icons.check_circle_outline),
+                    onAction: pendingByItemId.contains(entry.item.id) ||
+                            isSubmitting
+                        ? null
+                        : () {
+                            _promptForNote(context).then((note) async {
+                              if (note == null) {
+                                return;
+                              }
+                              setState(() {
+                                _submittingRequests.add(entry.item.id);
+                              });
+                              try {
+                                final coordinator =
+                                    ref.read(syncCoordinatorProvider);
+                                await coordinator.ensureConnected();
+                                await coordinator.waitForConnection(
+                                  const Duration(seconds: 3),
+                                );
+                                final request =
+                                    await requestsController.submitRequest(
+                                  householdId: householdId,
+                                  itemId: entry.item.id,
+                                  submittedByUserId: userId,
+                                  isAdmin: role == UserRole.admin,
+                                  itemName: entry.item.name,
+                                  note: note.isEmpty ? null : note,
+                                );
+                                final queued = coordinator.isQueued(
+                                  SyncEntityType.completionRequests,
+                                  request.id,
+                                );
+                                final message = queued
+                                    ? 'Admin offline. Request queued and will send when nearby.'
+                                    : l10n.choresRequestSubmitted;
+                                if (!mounted) {
+                                  return;
+                                }
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(content: Text(message)),
+                                );
+                              } catch (error) {
+                                if (!mounted) {
+                                  return;
+                                }
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(content: Text(error.toString())),
+                                );
+                              } finally {
+                                if (mounted) {
+                                  setState(() {
+                                    _submittingRequests.remove(entry.item.id);
+                                  });
+                                }
+                              }
+                            });
+                          },
+                    onCleanNow: isAdmin
+                        ? () async {
+                            try {
+                              await itemsController.markCleanedNow(
+                                item: entry.item,
+                                userId: userId,
+                              );
+                              if (!context.mounted) {
+                                return;
+                              }
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: Text(l10n.choresMarkedCleaned),
+                                ),
+                              );
+                            } catch (error) {
+                              if (!context.mounted) {
+                                return;
+                              }
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(content: Text(error.toString())),
+                              );
+                            }
+                          }
+                        : null,
+                    onSnooze: isAdmin
+                        ? () async {
+                            final until = await _pickSnoozeUntil(context);
+                            if (until == null) {
+                              return;
+                            }
+                            try {
+                              await itemsController.snoozeItem(entry.item, until);
+                              if (!context.mounted) {
+                                return;
+                              }
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: Text(
+                                    l10n.choresSnoozedUntilToast(
+                                      formatShortDate(until),
+                                    ),
+                                  ),
+                                ),
+                              );
+                            } catch (error) {
+                              if (!context.mounted) {
+                                return;
+                              }
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(content: Text(error.toString())),
+                              );
+                            }
+                          }
+                        : null,
+                    onClearSnooze: isAdmin
+                        ? () async {
+                            try {
+                              await itemsController.clearSnooze(entry.item);
+                              if (!context.mounted) {
+                                return;
+                              }
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: Text(l10n.choresSnoozeCleared),
+                                ),
+                              );
+                            } catch (error) {
+                              if (!context.mounted) {
+                                return;
+                              }
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(content: Text(error.toString())),
+                              );
+                            }
+                          }
+                        : null,
+                    onTogglePause: isAdmin
+                        ? () async {
+                            try {
+                              await itemsController.setPaused(
+                                entry.item,
+                                !entry.item.isPaused,
+                              );
+                              if (!context.mounted) {
+                                return;
+                              }
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: Text(
+                                    entry.item.isPaused
+                                        ? l10n.choresResumedToast
+                                        : l10n.choresPausedToast,
+                                  ),
+                                ),
+                              );
+                            } catch (error) {
+                              if (!context.mounted) {
+                                return;
+                              }
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(content: Text(error.toString())),
+                              );
+                            }
+                          }
+                        : null,
+                  ),
+                );
+              },
+            ),
+          ),
+        ],
       ),
     );
   }
+}
+
+class _FilterBar extends StatelessWidget {
+  const _FilterBar({
+    required this.options,
+    required this.selected,
+    required this.onSelected,
+  });
+
+  final List<String> options;
+  final String? selected;
+  final ValueChanged<String?> onSelected;
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      height: 54,
+      child: ListView(
+        scrollDirection: Axis.horizontal,
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+        children: [
+          Padding(
+            padding: const EdgeInsets.only(right: 8),
+            child: FilterChip(
+              label: const Text('All'),
+              selected: selected == null,
+              onSelected: (_) => onSelected(null),
+            ),
+          ),
+          for (final option in options)
+            Padding(
+              padding: const EdgeInsets.only(right: 8),
+              child: FilterChip(
+                label: Text(option),
+                selected: selected == option,
+                onSelected: (_) => onSelected(option),
+              ),
+            ),
+        ],
+      ),
+    );
+  }
+}
+
+String? _normalizeRoom(String? value) {
+  final trimmed = value?.trim();
+  if (trimmed == null || trimmed.isEmpty) {
+    return null;
+  }
+  return trimmed;
+}
+
+List<String> _roomOptions(List<ItemBoardEntry> entries) {
+  final rooms = <String>{};
+  for (final entry in entries) {
+    final normalized = _normalizeRoom(entry.item.roomOrZone);
+    if (normalized != null) {
+      rooms.add(normalized);
+    }
+  }
+  final sorted = rooms.toList()..sort();
+  return sorted;
 }
 
 class _ItemBoardCard extends StatelessWidget {
@@ -241,9 +418,12 @@ class _ItemBoardCard extends StatelessWidget {
     required this.entry,
     required this.onAction,
     required this.actionLabel,
+    required this.actionIcon,
     required this.showAction,
+    required this.underReview,
     required this.showAdminHint,
     required this.showAdminActions,
+    this.menu,
     this.onCleanNow,
     this.onSnooze,
     this.onClearSnooze,
@@ -251,11 +431,14 @@ class _ItemBoardCard extends StatelessWidget {
   });
 
   final ItemBoardEntry entry;
-  final VoidCallback onAction;
+  final VoidCallback? onAction;
   final String actionLabel;
+  final Widget actionIcon;
   final bool showAction;
+  final bool underReview;
   final bool showAdminHint;
   final bool showAdminActions;
+  final Widget? menu;
   final VoidCallback? onCleanNow;
   final VoidCallback? onSnooze;
   final VoidCallback? onClearSnooze;
@@ -301,6 +484,10 @@ class _ItemBoardCard extends StatelessWidget {
                           style: theme.textTheme.titleMedium,
                         ),
                       ),
+                      if (menu != null) ...[
+                        const SizedBox(width: 8),
+                        menu!,
+                      ],
                     ],
                   ),
                   const SizedBox(height: 4),
@@ -323,10 +510,26 @@ class _ItemBoardCard extends StatelessWidget {
                     lastCleaned,
                     style: theme.textTheme.bodySmall,
                   ),
+                  if (entry.item.protectionUntil != null) ...[
+                    const SizedBox(height: 2),
+                    Text(
+                      l10n.choresProtectionUntil(
+                        formatShortDateTime(entry.item.protectionUntil!),
+                      ),
+                      style: theme.textTheme.bodySmall,
+                    ),
+                  ],
                   if (showAdminHint) ...[
                     const SizedBox(height: 6),
                     Text(
                       l10n.choresAdminReviewHint,
+                      style: theme.textTheme.labelSmall,
+                    ),
+                  ],
+                  if (underReview) ...[
+                    const SizedBox(height: 6),
+                    Text(
+                      l10n.statusPending,
                       style: theme.textTheme.labelSmall,
                     ),
                   ],
@@ -336,7 +539,7 @@ class _ItemBoardCard extends StatelessWidget {
                       alignment: Alignment.centerLeft,
                       child: OutlinedButton.icon(
                         onPressed: onAction,
-                        icon: const Icon(Icons.check_circle_outline),
+                        icon: actionIcon,
                         label: Text(actionLabel),
                       ),
                     ),
@@ -440,6 +643,106 @@ class _PointsBadge extends StatelessWidget {
           style: theme.textTheme.labelMedium,
         ),
       ),
+    );
+  }
+}
+
+enum _ChoreAction { useAmulet }
+
+Future<void> _showAmuletPicker({
+  required BuildContext context,
+  required WidgetRef ref,
+  required Item item,
+  required List<InventoryItem> inventory,
+}) async {
+  final l10n = AppLocalizations.of(context)!;
+  if (item.protectionUsed) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(l10n.choresAmuletAlreadyUsed)),
+    );
+    return;
+  }
+  if (item.protectionUntil != null &&
+      item.protectionUntil!.isAfter(DateTime.now())) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(l10n.choresAmuletAlreadyActive)),
+    );
+    return;
+  }
+  final available = inventory
+      .where(
+        (entry) =>
+            entry.isAvailable && entry.type == InventoryItemType.lossProtection,
+      )
+      .toList();
+  if (available.isEmpty) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(l10n.choresAmuletNone)),
+    );
+    return;
+  }
+  final selected = await showModalBottomSheet<InventoryItem>(
+    context: context,
+    builder: (context) => SafeArea(
+      child: ListView(
+        shrinkWrap: true,
+        children: [
+          ListTile(
+            title: Text(l10n.choresAmuletSelectTitle),
+          ),
+          for (final entry in available)
+            ListTile(
+              title: Text(
+                l10n.amuletLossProtection(entry.durationHours),
+              ),
+              subtitle: Text(l10n.amuletDurationLabel(entry.durationHours)),
+              onTap: () => Navigator.pop(context, entry),
+            ),
+        ],
+      ),
+    ),
+  );
+  if (selected == null) {
+    return;
+  }
+  final confirmed = await showDialog<bool>(
+    context: context,
+    builder: (context) => AlertDialog(
+      title: Text(l10n.choresAmuletConfirmTitle),
+      content: Text(l10n.choresAmuletConfirmBody(item.name)),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.pop(context, false),
+          child: Text(l10n.commonCancel),
+        ),
+        FilledButton(
+          onPressed: () => Navigator.pop(context, true),
+          child: Text(l10n.choresUseAmulet),
+        ),
+      ],
+    ),
+  );
+  if (confirmed != true) {
+    return;
+  }
+  final now = DateTime.now();
+  final itemsRepository = ref.read(itemsRepositoryProvider);
+  final inventoryRepository = ref.read(inventoryRepositoryProvider);
+  await itemsRepository.upsertItem(
+    item.copyWith(
+      protectionUntil: now.add(Duration(hours: selected.durationHours)),
+      protectionUsed: true,
+    ),
+  );
+  await inventoryRepository.upsertItem(
+    selected.copyWith(
+      usedAt: now,
+      appliedItemId: item.id,
+    ),
+  );
+  if (context.mounted) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(l10n.choresAmuletApplied)),
     );
   }
 }

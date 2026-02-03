@@ -2,6 +2,7 @@ import 'package:hive/hive.dart';
 
 import '../domain/area_category.dart';
 import '../domain/item.dart';
+import '../domain/item_type.dart';
 
 class ItemDto {
   ItemDto({
@@ -12,7 +13,11 @@ class ItemDto {
     required this.icon,
     required this.intervalSeconds,
     required this.points,
+    required this.overdueWeight,
+    required this.protectionUntil,
+    required this.protectionUsed,
     required this.isPaused,
+    required this.typeIndex,
     this.roomOrZone,
     this.snoozedUntil,
   });
@@ -24,6 +29,10 @@ class ItemDto {
   final String icon;
   final int intervalSeconds;
   final int points;
+  final int overdueWeight;
+  final DateTime? protectionUntil;
+  final bool protectionUsed;
+  final int typeIndex;
   final String? roomOrZone;
   final bool isPaused;
   final DateTime? snoozedUntil;
@@ -37,6 +46,10 @@ class ItemDto {
       icon: icon,
       intervalSeconds: intervalSeconds,
       points: points,
+      overdueWeight: overdueWeight,
+      protectionUntil: protectionUntil,
+      protectionUsed: protectionUsed,
+      type: ItemType.values[typeIndex],
       roomOrZone: roomOrZone,
       isPaused: isPaused,
       snoozedUntil: snoozedUntil,
@@ -52,6 +65,10 @@ class ItemDto {
       icon: item.icon,
       intervalSeconds: item.intervalSeconds,
       points: item.points,
+      overdueWeight: item.overdueWeight,
+      protectionUntil: item.protectionUntil,
+      protectionUsed: item.protectionUsed,
+      typeIndex: item.type.index,
       roomOrZone: item.roomOrZone,
       isPaused: item.isPaused,
       snoozedUntil: item.snoozedUntil,
@@ -79,6 +96,10 @@ class ItemDtoAdapter extends TypeAdapter<ItemDto> {
       icon: fields[4] as String,
       intervalSeconds: fields[5] as int,
       points: fields[9] as int? ?? 10,
+      overdueWeight: fields[10] as int? ?? 0,
+      protectionUntil: fields[11] as DateTime?,
+      protectionUsed: fields[12] as bool? ?? false,
+      typeIndex: fields[13] as int? ?? ItemType.recurring.index,
       roomOrZone: fields[6] as String?,
       isPaused: fields[7] as bool,
       snoozedUntil: fields[8] as DateTime?,
@@ -88,7 +109,7 @@ class ItemDtoAdapter extends TypeAdapter<ItemDto> {
   @override
   void write(BinaryWriter writer, ItemDto obj) {
     writer
-      ..writeByte(10)
+      ..writeByte(14)
       ..writeByte(0)
       ..write(obj.id)
       ..writeByte(1)
@@ -103,6 +124,14 @@ class ItemDtoAdapter extends TypeAdapter<ItemDto> {
       ..write(obj.intervalSeconds)
       ..writeByte(9)
       ..write(obj.points)
+      ..writeByte(10)
+      ..write(obj.overdueWeight)
+      ..writeByte(11)
+      ..write(obj.protectionUntil)
+      ..writeByte(12)
+      ..write(obj.protectionUsed)
+      ..writeByte(13)
+      ..write(obj.typeIndex)
       ..writeByte(6)
       ..write(obj.roomOrZone)
       ..writeByte(7)

@@ -4,18 +4,29 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../core/localization/localized_labels.dart';
 import '../../../core/utils/date_format.dart';
 import '../../../core/providers/user_providers.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../items/application/items_providers.dart';
 import '../../household/application/household_providers.dart';
 import '../../points/application/points_providers.dart';
+import '../../points/data/ledger_repository.dart';
+import '../../points/domain/ledger_entry.dart';
+import '../../points/domain/ledger_reason.dart';
 import '../application/rewards_providers.dart';
 import '../data/box_rules_repository.dart';
+import '../data/inventory_repository.dart';
 import '../data/rewards_repository.dart';
 import '../domain/box_rule.dart';
+import '../domain/inventory_item.dart';
+import '../domain/inventory_item_type.dart';
 import '../domain/reward.dart';
 import '../domain/redemption.dart';
+import '../domain/redemption_status.dart';
+
+final _redemptionFilterProvider =
+    StateProvider.autoDispose<RedemptionStatus?>((ref) => null);
 
 class RewardsScreen extends ConsumerWidget {
   const RewardsScreen({super.key});
@@ -28,23 +39,15 @@ class RewardsScreen extends ConsumerWidget {
     final redemptions = ref.watch(redemptionsProvider).value ?? [];
     final householdRedemptions =
         ref.watch(householdRedemptionsProvider).value ?? [];
-    final household = ref.watch(activeHouseholdProvider).value;
     final profiles = ref.watch(householdProfilesProvider).value ?? [];
     final profileById = {
       for (final profile in profiles) profile.id: profile,
     };
-    final adminIds = household?.adminIds.toSet() ?? <String>{};
-    final memberIds = household?.memberIds.toSet() ?? <String>{};
-    final adminRedemptions = householdRedemptions.where((redemption) {
-      final role = profileById[redemption.userId]?.role;
-      return adminIds.contains(redemption.userId) || role == UserRole.admin;
-    }).toList();
-    final memberRedemptions = householdRedemptions.where((redemption) {
-      final role = profileById[redemption.userId]?.role;
-      final isAdmin = adminIds.contains(redemption.userId) || role == UserRole.admin;
-      final isMember = memberIds.contains(redemption.userId) || role == UserRole.member;
-      return isMember || !isAdmin;
-    }).toList();
+    final displayNameForUserId =
+        (String id) => profileById[id]?.displayName ?? id;
+    final pendingRequests = householdRedemptions
+        .where((redemption) => redemption.status == RedemptionStatus.pending)
+        .toList();
     final balance = ref.watch(pointsBalanceProvider);
     final householdId = ref.read(activeHouseholdIdProvider);
     final userId = ref.read(currentUserIdProvider);
@@ -52,7 +55,18 @@ class RewardsScreen extends ConsumerWidget {
     final role = ref.watch(currentUserRoleProvider);
     final rewardsRepository = ref.read(rewardsRepositoryProvider);
     final rulesRepository = ref.read(boxRulesRepositoryProvider);
+    final inventoryRepository = ref.read(inventoryRepositoryProvider);
+    final ledgerRepository = ref.read(ledgerRepositoryProvider);
+    final inventory = ref.watch(inventoryProvider).value ?? <InventoryItem>[];
+    final availableInventory =
+        inventory.where((item) => item.isAvailable).toList();
     final scheme = Theme.of(context).colorScheme;
+    final filter = ref.watch(_redemptionFilterProvider);
+    final filteredRedemptions = filter == null
+        ? redemptions
+        : redemptions.where((redemption) => redemption.status == filter).toList();
+    final shopItems = _shopItems();
+    final currentUserLabel = displayNameForUserId(userId);
 
     return Scaffold(
       appBar: AppBar(
@@ -153,7 +167,9 @@ class RewardsScreen extends ConsumerWidget {
                   rewards: rewards,
                   statusLines: statusLines,
                   onViewOdds: () => _showOdds(context, rule, rewards),
-                  onRedeem: () async {
+                  onRedeem: role == UserRole.admin
+                      ? null
+                      : () async {
                     try {
                       final redemption = await controller.redeem(
                         householdId: householdId,
@@ -161,7 +177,7 @@ class RewardsScreen extends ConsumerWidget {
                         boxRule: rule,
                         pointsBalance: balance,
                         existingRedemptions: redemptions,
-                        userLabel: userId,
+                        userLabel: currentUserLabel,
                       );
                       if (!context.mounted) {
                         return;
@@ -171,7 +187,9 @@ class RewardsScreen extends ConsumerWidget {
                         orElse: () => Reward(
                           id: redemption.outcomeRewardId,
                           householdId: redemption.householdId,
-                          title: l10n.commonUnknownReward,
+                          title: redemption.outcomeRewardId == noRewardId
+                              ? l10n.rewardsNothingFound
+                              : l10n.commonUnknownReward,
                           weight: 0,
                           enabled: false,
                         ),
@@ -196,6 +214,51 @@ class RewardsScreen extends ConsumerWidget {
                 );
               },
             ),
+          const SizedBox(height: 16),
+          Text(
+            l10n.shopItemsTitle,
+            style: Theme.of(context).textTheme.titleMedium,
+          ),
+          const SizedBox(height: 8),
+          ...shopItems.map(
+            (item) => _ShopItemCard(
+              item: item,
+              canAfford: balance >= item.price,
+              onBuy: () async {
+                if (balance < item.price) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text(l10n.rewardsNotEnoughPoints)),
+                  );
+                  return;
+                }
+                final now = DateTime.now();
+                final inventoryItem = InventoryItem(
+                  id: now.microsecondsSinceEpoch.toString(),
+                  householdId: householdId,
+                  userId: userId,
+                  type: InventoryItemType.lossProtection,
+                  durationHours: item.durationHours,
+                  purchasedAt: now,
+                );
+                await inventoryRepository.upsertItem(inventoryItem);
+                await ledgerRepository.addEntry(
+                  LedgerEntry(
+                    id: now.microsecondsSinceEpoch.toString(),
+                    householdId: householdId,
+                    userId: userId,
+                    delta: -item.price,
+                    createdAt: now,
+                    reason: LedgerReason.inventoryPurchase,
+                  ),
+                );
+                if (context.mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text(l10n.shopPurchaseSuccess)),
+                  );
+                }
+              },
+            ),
+          ),
           if (role == UserRole.admin) ...[
             const SizedBox(height: 20),
             Text(
@@ -305,21 +368,61 @@ class RewardsScreen extends ConsumerWidget {
           ],
           const SizedBox(height: 16),
           Text(
+            l10n.inventoryTitle,
+            style: Theme.of(context).textTheme.titleMedium,
+          ),
+          const SizedBox(height: 8),
+          if (availableInventory.isEmpty)
+            Text(l10n.inventoryEmpty)
+          else
+            ...availableInventory.map(
+              (item) => _InventoryItemTile(item: item),
+            ),
+          const SizedBox(height: 16),
+          Text(
             l10n.rewardsMyRewards,
             style: Theme.of(context).textTheme.titleMedium,
           ),
           const SizedBox(height: 8),
+          Row(
+            children: [
+              Text(
+                l10n.rewardsFilterLabel,
+                style: Theme.of(context).textTheme.labelLarge,
+              ),
+              const SizedBox(width: 8),
+              DropdownButton<RedemptionStatus?>(
+                value: filter,
+                onChanged: (value) => ref
+                    .read(_redemptionFilterProvider.notifier)
+                    .state = value,
+                items: [
+                  DropdownMenuItem(
+                    value: null,
+                    child: Text(l10n.rewardsFilterAll),
+                  ),
+                  for (final status in RedemptionStatus.values)
+                    DropdownMenuItem(
+                      value: status,
+                      child: Text(localizedRedemptionStatus(l10n, status)),
+                    ),
+                ],
+              ),
+            ],
+          ),
+          const SizedBox(height: 4),
           Align(
             alignment: Alignment.centerLeft,
             child: TextButton.icon(
-              onPressed: redemptions.isEmpty
+              onPressed: filteredRedemptions.isEmpty
                   ? null
                   : () => _showRedemptionsHistory(
                         context: context,
                         l10n: l10n,
                         title: l10n.rewardsMyRewards,
                         rewards: rewards,
-                        redemptions: redemptions,
+                        redemptions: filteredRedemptions,
+                        displayNameForUserId: displayNameForUserId,
                         showUserId: false,
                       ),
               icon: const Icon(Icons.history),
@@ -327,87 +430,94 @@ class RewardsScreen extends ConsumerWidget {
             ),
           ),
           const SizedBox(height: 8),
-          if (redemptions.isEmpty)
+          if (filteredRedemptions.isEmpty)
             Text(l10n.rewardsNoRedemptions)
           else
-            ...redemptions.take(5).map(
+            ...filteredRedemptions.take(5).map(
                   (redemption) => _RedemptionTile(
                     title: _rewardTitleFor(l10n, rewards, redemption),
                     subtitle: formatShortDateTime(redemption.rolledAt),
                     costPoints: redemption.costPoints,
+                    statusLabel:
+                        localizedRedemptionStatus(l10n, redemption.status),
+                    actionLabel: redemption.status == RedemptionStatus.active
+                        ? l10n.rewardsRedeem
+                        : null,
+                    onAction: redemption.status == RedemptionStatus.active
+                        ? () async {
+                            try {
+                              await controller.requestRedemption(
+                                redemption: redemption,
+                              );
+                              if (!context.mounted) {
+                                return;
+                              }
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: Text(l10n.rewardsRedeemRequested),
+                                ),
+                              );
+                            } catch (error) {
+                              if (!context.mounted) {
+                                return;
+                              }
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(content: Text(error.toString())),
+                              );
+                            }
+                          }
+                        : null,
                   ),
                 ),
-          const SizedBox(height: 16),
-          Text(
-            l10n.rewardsAdminRewards,
-            style: Theme.of(context).textTheme.titleMedium,
-          ),
-          const SizedBox(height: 8),
-          Align(
-            alignment: Alignment.centerLeft,
-            child: TextButton.icon(
-              onPressed: adminRedemptions.isEmpty
-                  ? null
-                  : () => _showRedemptionsHistory(
-                        context: context,
-                        l10n: l10n,
-                        title: l10n.rewardsAdminRewards,
-                        rewards: rewards,
-                        redemptions: adminRedemptions,
-                        showUserId: true,
-                      ),
-              icon: const Icon(Icons.history),
-              label: Text(l10n.rewardsViewAll),
+          if (role == UserRole.admin) ...[
+            const SizedBox(height: 16),
+            Text(
+              l10n.rewardsRedeemRequestsTitle,
+              style: Theme.of(context).textTheme.titleMedium,
             ),
-          ),
-          const SizedBox(height: 8),
-          if (adminRedemptions.isEmpty)
-            Text(l10n.rewardsNoAdminRewards)
-          else
-            ...adminRedemptions.take(10).map(
-                  (redemption) => _RedemptionTile(
-                    title: _rewardTitleFor(l10n, rewards, redemption),
-                    subtitle:
-                        '${redemption.userId} • ${formatShortDateTime(redemption.rolledAt)}',
-                    costPoints: redemption.costPoints,
-                    highlight: true,
-                  ),
+            const SizedBox(height: 8),
+            if (pendingRequests.isEmpty)
+              Text(l10n.rewardsNoRedeemRequests)
+            else
+              ...pendingRequests.map(
+                (redemption) => _RedemptionRequestCard(
+                  redemption: redemption,
+                  title: _rewardTitleFor(l10n, rewards, redemption),
+                  userLabel: profileById[redemption.userId]?.displayName ??
+                      redemption.userId,
+                  onApprove: () async {
+                    try {
+                      await controller.approveRedemption(
+                        redemption: redemption,
+                        reviewedByUserId: userId,
+                      );
+                    } catch (error) {
+                      if (!context.mounted) {
+                        return;
+                      }
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(content: Text(error.toString())),
+                      );
+                    }
+                  },
+                  onReject: () async {
+                    try {
+                      await controller.rejectRedemption(
+                        redemption: redemption,
+                        reviewedByUserId: userId,
+                      );
+                    } catch (error) {
+                      if (!context.mounted) {
+                        return;
+                      }
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(content: Text(error.toString())),
+                      );
+                    }
+                  },
                 ),
-          const SizedBox(height: 16),
-          Text(
-            l10n.rewardsMemberRewards,
-            style: Theme.of(context).textTheme.titleMedium,
-          ),
-          const SizedBox(height: 8),
-          Align(
-            alignment: Alignment.centerLeft,
-            child: TextButton.icon(
-              onPressed: memberRedemptions.isEmpty
-                  ? null
-                  : () => _showRedemptionsHistory(
-                        context: context,
-                        l10n: l10n,
-                        title: l10n.rewardsMemberRewards,
-                        rewards: rewards,
-                        redemptions: memberRedemptions,
-                        showUserId: true,
-                      ),
-              icon: const Icon(Icons.history),
-              label: Text(l10n.rewardsViewAll),
-            ),
-          ),
-          const SizedBox(height: 8),
-          if (memberRedemptions.isEmpty)
-            Text(l10n.rewardsNoMemberRewards)
-          else
-            ...memberRedemptions.take(10).map(
-                  (redemption) => _RedemptionTile(
-                    title: _rewardTitleFor(l10n, rewards, redemption),
-                    subtitle:
-                        '${redemption.userId} • ${formatShortDateTime(redemption.rolledAt)}',
-                    costPoints: redemption.costPoints,
-                  ),
-                ),
+              ),
+          ],
         ],
       ),
     );
@@ -419,6 +529,9 @@ String _rewardTitleFor(
   List<Reward> rewards,
   Redemption redemption,
 ) {
+  if (redemption.outcomeRewardId == noRewardId) {
+    return l10n.rewardsNothingFound;
+  }
   return rewards
       .firstWhere(
         (reward) => reward.id == redemption.outcomeRewardId,
@@ -439,6 +552,7 @@ Future<void> _showRedemptionsHistory({
   required String title,
   required List<Reward> rewards,
   required List<Redemption> redemptions,
+  required String Function(String) displayNameForUserId,
   required bool showUserId,
 }) {
   return showModalBottomSheet<void>(
@@ -478,13 +592,25 @@ Future<void> _showRedemptionsHistory({
                 separatorBuilder: (_, __) => const Divider(height: 1),
                 itemBuilder: (context, index) {
                   final redemption = redemptions[index];
+                  final userLabel = displayNameForUserId(redemption.userId);
                   final subtitle = showUserId
-                      ? '${redemption.userId} • ${formatShortDateTime(redemption.rolledAt)}'
+                      ? '$userLabel • ${formatShortDateTime(redemption.rolledAt)}'
                       : formatShortDateTime(redemption.rolledAt);
                   return ListTile(
                     title: Text(_rewardTitleFor(l10n, rewards, redemption)),
                     subtitle: Text(subtitle),
-                    trailing: Text('-${redemption.costPoints}'),
+                    trailing: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      crossAxisAlignment: CrossAxisAlignment.end,
+                      children: [
+                        Text('-${redemption.costPoints}'),
+                        const SizedBox(height: 4),
+                        Text(
+                          localizedRedemptionStatus(l10n, redemption.status),
+                          style: Theme.of(context).textTheme.labelSmall,
+                        ),
+                      ],
+                    ),
                   );
                 },
               ),
@@ -502,14 +628,14 @@ class _BoxRuleCard extends StatefulWidget {
     required this.rewards,
     required this.statusLines,
     required this.onViewOdds,
-    required this.onRedeem,
+    this.onRedeem,
   });
 
   final BoxRule rule;
   final List<Reward> rewards;
   final List<String> statusLines;
   final VoidCallback onViewOdds;
-  final VoidCallback onRedeem;
+  final VoidCallback? onRedeem;
 
   @override
   State<_BoxRuleCard> createState() => _BoxRuleCardState();
@@ -828,17 +954,171 @@ class _InfoChip extends StatelessWidget {
   }
 }
 
+class _ShopItem {
+  const _ShopItem({
+    required this.durationHours,
+    required this.price,
+  });
+
+  final int durationHours;
+  final int price;
+}
+
+List<_ShopItem> _shopItems() {
+  return const [
+    _ShopItem(durationHours: 24, price: 15),
+    _ShopItem(durationHours: 48, price: 35),
+    _ShopItem(durationHours: 72, price: 40),
+  ];
+}
+
+class _ShopItemCard extends StatelessWidget {
+  const _ShopItemCard({
+    required this.item,
+    required this.canAfford,
+    required this.onBuy,
+  });
+
+  final _ShopItem item;
+  final bool canAfford;
+  final VoidCallback onBuy;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    final scheme = Theme.of(context).colorScheme;
+    return Container(
+      margin: const EdgeInsets.only(bottom: 8),
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+      decoration: BoxDecoration(
+        color: scheme.surfaceContainerLow,
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: scheme.outlineVariant.withOpacity(0.3)),
+      ),
+      child: Row(
+        children: [
+          Container(
+            width: 40,
+            height: 40,
+            decoration: BoxDecoration(
+              color: scheme.primaryContainer,
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Icon(
+              Icons.shield_moon_outlined,
+              color: scheme.primary,
+            ),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  l10n.amuletLossProtection(item.durationHours),
+                  style: Theme.of(context).textTheme.titleSmall,
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  l10n.amuletDurationLabel(item.durationHours),
+                  style: Theme.of(context).textTheme.bodySmall,
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(width: 12),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children: [
+              Text(
+                l10n.commonPointsShort(item.price),
+                style: Theme.of(context).textTheme.labelLarge,
+              ),
+              const SizedBox(height: 6),
+              OutlinedButton(
+                onPressed: canAfford ? onBuy : null,
+                child: Text(l10n.shopBuy),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _InventoryItemTile extends StatelessWidget {
+  const _InventoryItemTile({required this.item});
+
+  final InventoryItem item;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    final scheme = Theme.of(context).colorScheme;
+    return Container(
+      margin: const EdgeInsets.only(bottom: 8),
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+      decoration: BoxDecoration(
+        color: scheme.surfaceContainerLow,
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: scheme.outlineVariant.withOpacity(0.3)),
+      ),
+      child: Row(
+        children: [
+          Container(
+            width: 36,
+            height: 36,
+            decoration: BoxDecoration(
+              color: scheme.secondaryContainer,
+              borderRadius: BorderRadius.circular(10),
+            ),
+            child: Icon(
+              Icons.auto_awesome,
+              color: scheme.onSecondaryContainer,
+              size: 20,
+            ),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  l10n.amuletLossProtection(item.durationHours),
+                  style: Theme.of(context).textTheme.titleSmall,
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  l10n.inventoryUseFromChore,
+                  style: Theme.of(context).textTheme.bodySmall,
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
 class _RedemptionTile extends StatelessWidget {
   const _RedemptionTile({
     required this.title,
     required this.subtitle,
     required this.costPoints,
+    this.statusLabel,
+    this.actionLabel,
+    this.onAction,
     this.highlight = false,
   });
 
   final String title;
   final String subtitle;
   final int costPoints;
+  final String? statusLabel;
+  final String? actionLabel;
+  final VoidCallback? onAction;
   final bool highlight;
 
   @override
@@ -884,22 +1164,103 @@ class _RedemptionTile extends StatelessWidget {
                   subtitle,
                   style: Theme.of(context).textTheme.bodySmall,
                 ),
+                if (statusLabel != null) ...[
+                  const SizedBox(height: 4),
+                  Text(
+                    statusLabel!,
+                    style: Theme.of(context).textTheme.labelSmall,
+                  ),
+                ],
               ],
             ),
           ),
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-            decoration: BoxDecoration(
-              color: scheme.primary.withOpacity(0.12),
-              borderRadius: BorderRadius.circular(999),
-            ),
-            child: Text(
-              '-$costPoints',
-              style: Theme.of(context)
-                  .textTheme
-                  .labelLarge
-                  ?.copyWith(color: scheme.primary),
-            ),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children: [
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                decoration: BoxDecoration(
+                  color: scheme.primary.withOpacity(0.12),
+                  borderRadius: BorderRadius.circular(999),
+                ),
+                child: Text(
+                  '-$costPoints',
+                  style: Theme.of(context)
+                      .textTheme
+                      .labelLarge
+                      ?.copyWith(color: scheme.primary),
+                ),
+              ),
+              if (actionLabel != null && onAction != null) ...[
+                const SizedBox(height: 8),
+                SizedBox(
+                  height: 32,
+                  child: OutlinedButton(
+                    onPressed: onAction,
+                    child: Text(actionLabel!),
+                  ),
+                ),
+              ],
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _RedemptionRequestCard extends StatelessWidget {
+  const _RedemptionRequestCard({
+    required this.redemption,
+    required this.title,
+    required this.userLabel,
+    required this.onApprove,
+    required this.onReject,
+  });
+
+  final Redemption redemption;
+  final String title;
+  final String userLabel;
+  final VoidCallback onApprove;
+  final VoidCallback onReject;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    final scheme = Theme.of(context).colorScheme;
+    return Container(
+      margin: const EdgeInsets.only(bottom: 8),
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+      decoration: BoxDecoration(
+        color: scheme.surfaceContainerLow,
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: scheme.outlineVariant.withOpacity(0.3)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            title,
+            style: Theme.of(context).textTheme.titleSmall,
+          ),
+          const SizedBox(height: 4),
+          Text(
+            '$userLabel • ${formatShortDateTime(redemption.requestedAt ?? redemption.rolledAt)}',
+            style: Theme.of(context).textTheme.bodySmall,
+          ),
+          const SizedBox(height: 8),
+          Row(
+            children: [
+              FilledButton(
+                onPressed: onApprove,
+                child: Text(l10n.commonApprove),
+              ),
+              const SizedBox(width: 10),
+              OutlinedButton(
+                onPressed: onReject,
+                child: Text(l10n.commonReject),
+              ),
+            ],
           ),
         ],
       ),
@@ -1018,7 +1379,10 @@ Future<void> _showRewardEditor({
           onPressed: () async {
             final title = titleController.text.trim();
             final weight = int.tryParse(weightController.text.trim()) ?? 0;
-            if (title.isEmpty || weight <= 0) {
+            if (title.isEmpty || weight < 0 || weight > 100) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(content: Text(l10n.rewardsChanceInvalid)),
+              );
               return;
             }
             final updated = Reward(
@@ -1054,8 +1418,11 @@ Future<void> _showBoxRuleEditor({
   final titleController = TextEditingController(text: rule?.title ?? '');
   final costController =
       TextEditingController(text: rule?.costPoints.toString() ?? '20');
+  final cooldownDays = rule == null
+      ? 7
+      : (rule.cooldownSeconds / Duration.secondsPerDay).round();
   final cooldownController = TextEditingController(
-    text: rule?.cooldownSeconds.toString() ?? '${60 * 60 * 12}',
+    text: cooldownDays.toString(),
   );
   final maxPerDayController =
       TextEditingController(text: rule?.maxPerDay.toString() ?? '2');
@@ -1136,9 +1503,24 @@ Future<void> _showBoxRuleEditor({
           onPressed: () async {
             final title = titleController.text.trim();
             final cost = int.tryParse(costController.text.trim()) ?? 0;
-            final cooldown = int.tryParse(cooldownController.text.trim()) ?? 0;
+            final cooldownDays =
+                int.tryParse(cooldownController.text.trim()) ?? 0;
             final maxPerDay = int.tryParse(maxPerDayController.text.trim()) ?? 0;
             if (title.isEmpty || cost <= 0 || selected.isEmpty) {
+              return;
+            }
+            final selectedRewards = rewards
+                .where((reward) => selected.contains(reward.id))
+                .where((reward) => reward.enabled && reward.weight > 0)
+                .toList();
+            final totalWeight = selectedRewards.fold<int>(
+              0,
+              (sum, reward) => sum + reward.weight,
+            );
+            if (totalWeight > 100) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(content: Text(l10n.rewardsChanceOverLimit)),
+              );
               return;
             }
             final updated = BoxRule(
@@ -1146,7 +1528,7 @@ Future<void> _showBoxRuleEditor({
               householdId: householdId,
               title: title,
               costPoints: cost,
-              cooldownSeconds: cooldown,
+              cooldownSeconds: cooldownDays * Duration.secondsPerDay,
               maxPerDay: maxPerDay,
               rewardIds: selected.toList(),
             );
@@ -1234,6 +1616,7 @@ Future<void> _showOdds(
       .toList();
   final totalWeight =
       eligible.fold<int>(0, (sum, reward) => sum + reward.weight);
+  final remaining = (100 - totalWeight).clamp(0, 100);
 
   return showDialog<void>(
     context: context,
@@ -1241,19 +1624,20 @@ Future<void> _showOdds(
       title: Text(l10n.rewardsOddsTitle),
       content: SizedBox(
         width: double.maxFinite,
-        child: ListView.builder(
+        child: ListView(
           shrinkWrap: true,
-          itemCount: eligible.length,
-          itemBuilder: (context, index) {
-            final reward = eligible[index];
-            final percent = totalWeight == 0
-                ? 0
-                : (reward.weight / totalWeight * 100);
-            return ListTile(
-              title: Text(reward.title),
-              trailing: Text('${percent.toStringAsFixed(1)}%'),
-            );
-          },
+          children: [
+            for (final reward in eligible)
+              ListTile(
+                title: Text(reward.title),
+                trailing: Text('${reward.weight}%'),
+              ),
+            if (remaining > 0)
+              ListTile(
+                title: Text(l10n.rewardsNothingFound),
+                trailing: Text('$remaining%'),
+              ),
+          ],
         ),
       ),
       actions: [

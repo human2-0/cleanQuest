@@ -8,6 +8,7 @@ import '../application/items_providers.dart';
 import '../domain/area_category.dart';
 import '../domain/completion_event.dart';
 import '../domain/item.dart';
+import '../domain/item_type.dart';
 
 class ItemDetailScreen extends ConsumerStatefulWidget {
   const ItemDetailScreen({super.key, this.itemId, this.readOnly = false});
@@ -25,7 +26,9 @@ class _ItemDetailScreenState extends ConsumerState<ItemDetailScreen> {
   final _roomController = TextEditingController();
   final _intervalDaysController = TextEditingController();
   final _pointsController = TextEditingController();
+  final _overdueWeightController = TextEditingController();
   AreaCategory _category = AreaCategory.home;
+  ItemType _type = ItemType.recurring;
   bool _isPaused = false;
   bool _didInit = false;
   ProviderSubscription<AsyncValue<List<Item>>>? _itemsSubscription;
@@ -35,6 +38,7 @@ class _ItemDetailScreenState extends ConsumerState<ItemDetailScreen> {
     super.initState();
     if (widget.itemId == null) {
       _pointsController.text = '10';
+      _overdueWeightController.text = '0';
       _didInit = true;
       return;
     }
@@ -64,6 +68,7 @@ class _ItemDetailScreenState extends ConsumerState<ItemDetailScreen> {
     _roomController.dispose();
     _intervalDaysController.dispose();
     _pointsController.dispose();
+    _overdueWeightController.dispose();
     super.dispose();
   }
 
@@ -152,6 +157,32 @@ class _ItemDetailScreenState extends ConsumerState<ItemDetailScreen> {
             },
           ),
           const SizedBox(height: 12),
+          DropdownButtonFormField<ItemType>(
+            value: _type,
+            decoration: InputDecoration(labelText: l10n.choreTypeLabel),
+            items: ItemType.values
+                .map(
+                  (type) => DropdownMenuItem(
+                    value: type,
+                    child: Text(localizedItemType(l10n, type)),
+                  ),
+                )
+                .toList(),
+            onChanged: readOnly
+                ? null
+                : (value) {
+              if (value == null) {
+                return;
+              }
+              setState(() {
+                _type = value;
+                if (_type == ItemType.singular) {
+                  _intervalDaysController.text = '';
+                }
+              });
+            },
+          ),
+          const SizedBox(height: 12),
           TextField(
             controller: _roomController,
             decoration: InputDecoration(labelText: l10n.choreRoomLabel),
@@ -161,14 +192,39 @@ class _ItemDetailScreenState extends ConsumerState<ItemDetailScreen> {
           const SizedBox(height: 12),
           TextField(
             controller: _intervalDaysController,
-            decoration: InputDecoration(labelText: l10n.choreIntervalLabel),
+            decoration: InputDecoration(
+              labelText: l10n.choreIntervalLabel,
+              suffixIcon: const Tooltip(
+                message: 'How many days between repeats. Leave empty for one-time chores.',
+                child: Icon(Icons.info_outline),
+              ),
+            ),
+            keyboardType: TextInputType.number,
+            enabled: !readOnly && _type == ItemType.recurring,
+          ),
+          const SizedBox(height: 12),
+          TextField(
+            controller: _overdueWeightController,
+            decoration: InputDecoration(
+              labelText: l10n.choreOverdueWeightLabel,
+              suffixIcon: const Tooltip(
+                message: 'Extra penalty points per overdue day. 0 means no penalty.',
+                child: Icon(Icons.info_outline),
+              ),
+            ),
             keyboardType: TextInputType.number,
             enabled: !readOnly,
           ),
           const SizedBox(height: 12),
           TextField(
             controller: _pointsController,
-            decoration: InputDecoration(labelText: l10n.chorePointsLabel),
+            decoration: InputDecoration(
+              labelText: l10n.chorePointsLabel,
+              suffixIcon: const Tooltip(
+                message: 'Points earned when this chore is approved.',
+                child: Icon(Icons.info_outline),
+              ),
+            ),
             keyboardType: TextInputType.number,
             enabled: !readOnly,
           ),
@@ -211,14 +267,24 @@ class _ItemDetailScreenState extends ConsumerState<ItemDetailScreen> {
       _showMessage(context, l10n.choreNameRequired);
       return;
     }
-    final intervalDays = int.tryParse(_intervalDaysController.text.trim());
-    if (intervalDays == null || intervalDays <= 0) {
-      _showMessage(context, l10n.choreIntervalPositive);
-      return;
+    int intervalSeconds = 0;
+    if (_type == ItemType.recurring) {
+      final intervalDays = int.tryParse(_intervalDaysController.text.trim());
+      if (intervalDays == null || intervalDays <= 0) {
+        _showMessage(context, l10n.choreIntervalPositive);
+        return;
+      }
+      intervalSeconds = intervalDays * Duration.secondsPerDay;
     }
     final points = int.tryParse(_pointsController.text.trim());
     if (points == null || points <= 0) {
       _showMessage(context, l10n.chorePointsPositive);
+      return;
+    }
+    final overdueWeight =
+        int.tryParse(_overdueWeightController.text.trim());
+    if (overdueWeight == null || overdueWeight < 0) {
+      _showMessage(context, l10n.choreOverdueWeightInvalid);
       return;
     }
     final icon = _iconController.text.trim().isEmpty
@@ -234,8 +300,10 @@ class _ItemDetailScreenState extends ConsumerState<ItemDetailScreen> {
       name: name,
       category: _category,
       icon: icon,
-      intervalSeconds: intervalDays * Duration.secondsPerDay,
+      intervalSeconds: intervalSeconds,
       points: points,
+      overdueWeight: overdueWeight,
+      type: _type,
       roomOrZone: room,
       isPaused: _isPaused,
       snoozedUntil: existing?.snoozedUntil,
@@ -256,11 +324,14 @@ class _ItemDetailScreenState extends ConsumerState<ItemDetailScreen> {
     _nameController.text = item.name;
     _iconController.text = item.icon;
     _roomController.text = item.roomOrZone ?? '';
-    _intervalDaysController.text =
-        (item.intervalSeconds / Duration.secondsPerDay).round().toString();
+    _intervalDaysController.text = item.type == ItemType.recurring
+        ? (item.intervalSeconds / Duration.secondsPerDay).round().toString()
+        : '';
     _pointsController.text = item.points.toString();
+    _overdueWeightController.text = item.overdueWeight.toString();
     setState(() {
       _category = item.category;
+      _type = item.type;
       _isPaused = item.isPaused;
     });
   }

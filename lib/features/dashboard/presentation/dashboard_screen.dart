@@ -1,15 +1,20 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../core/app_config/app_config_providers.dart';
 import '../../../core/providers/user_providers.dart';
 import '../../../core/utils/date_format.dart';
 import '../../../core/localization/localized_labels.dart';
+import '../../../core/profiles/local_profiles_providers.dart';
 import '../../../l10n/app_localizations.dart';
+import '../../../core/sync/sync_providers.dart';
+import '../../../core/sync/sync_coordinator.dart';
 import '../../approvals/application/approvals_providers.dart';
 import '../../approvals/domain/completion_request.dart';
 import '../../approvals/domain/request_status.dart';
 import '../../approvals/presentation/approvals_screen.dart';
 import '../../household/application/household_providers.dart';
+import '../../household/domain/user_profile.dart';
 import '../../items/presentation/items_board_screen.dart';
 import '../../items/application/items_providers.dart';
 import '../../items/application/item_board_entry.dart';
@@ -18,6 +23,9 @@ import '../../items/domain/item_status.dart';
 import '../../items/presentation/item_detail_screen.dart';
 import '../../points/application/points_providers.dart';
 import '../../rewards/presentation/rewards_screen.dart';
+import '../../behaviors/application/behavior_rules_providers.dart';
+import '../../behaviors/presentation/behavior_rules_screen.dart';
+import '../../behaviors/domain/behavior_rule.dart';
 import '../../rewards/application/rewards_providers.dart';
 import '../../rewards/domain/reward.dart';
 import '../../rewards/domain/redemption.dart';
@@ -45,14 +53,26 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
     final l10n = AppLocalizations.of(context)!;
     final balance = ref.watch(pointsBalanceProvider);
     final role = ref.watch(currentUserRoleProvider);
+    final config = ref.watch(appConfigProvider);
     final household = ref.watch(activeHouseholdProvider).value;
-    final profile = ref.watch(currentUserProfileProvider);
+    final profile = ref.watch(currentLocalProfileProvider);
+    final currentUserId = ref.watch(currentUserIdProvider);
+    final presence = ref.watch(syncPresenceProvider).value ?? <SyncPresenceEntry>[];
+    final profiles = ref.watch(householdProfilesProvider).value ?? <UserProfile>[];
     final requests =
         ref.watch(completionRequestsProvider).value ?? <CompletionRequest>[];
     final redemptions =
         ref.watch(redemptionsProvider).value ?? <Redemption>[];
     final items = ref.watch(itemsListProvider).value ?? <Item>[];
     final rewards = ref.watch(rewardsProvider).value ?? <Reward>[];
+    final behaviorRules =
+        ref.watch(behaviorRulesProvider).value ?? <BehaviorRule>[];
+    final totalLikes =
+        behaviorRules.fold<int>(0, (sum, rule) => sum + rule.likes);
+    final totalDislikes =
+        behaviorRules.fold<int>(0, (sum, rule) => sum + rule.dislikes);
+    final habitBalance = totalLikes - totalDislikes;
+    final habitTotal = totalLikes + totalDislikes;
     final entries = ref.watch(itemsBoardProvider);
     final pendingApprovals = ref.watch(pendingRequestsProvider).length;
     final now = DateTime.now();
@@ -87,7 +107,13 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
         title: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(household?.name ?? l10n.appTitle),
+            Text(
+              _resolveHouseholdName(
+                household?.name,
+                config.householdName,
+                l10n,
+              ),
+            ),
             if (profile != null)
               Text(
                 profile.displayName,
@@ -95,7 +121,35 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
               ),
           ],
         ),
+        bottom: role == UserRole.member && behaviorRules.isNotEmpty
+            ? PreferredSize(
+                preferredSize: const Size.fromHeight(40),
+                child: Padding(
+                  padding: const EdgeInsets.only(bottom: 8),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(
+                        'Habit balance',
+                        style: Theme.of(context).textTheme.labelSmall,
+                      ),
+                      const SizedBox(height: 4),
+                      _AppBarBalanceBar(
+                        score: habitBalance,
+                        total: habitTotal,
+                      ),
+                    ],
+                  ),
+                ),
+              )
+            : null,
         actions: [
+          _ConnectedPeersRow(
+            currentUserId: currentUserId,
+            presence: presence,
+            profiles: profiles,
+            primaryAdminId: household?.primaryAdminId ?? '',
+          ),
           IconButton(
             onPressed: () {
               Navigator.of(context).push(
@@ -109,9 +163,17 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
           ),
         ],
       ),
-      body: ListView(
-        padding: const EdgeInsets.all(16),
-        children: [
+      body: RefreshIndicator(
+        onRefresh: () async {
+          final coordinator = ref.read(syncCoordinatorProvider);
+          await coordinator.restartConnection();
+          await coordinator.requestFullSync();
+          await coordinator.ensureConnected();
+        },
+        child: ListView(
+          padding: const EdgeInsets.all(16),
+          physics: const AlwaysScrollableScrollPhysics(),
+          children: [
           Text(
             l10n.dashboardToday,
             style: Theme.of(context).textTheme.titleMedium,
@@ -173,16 +235,16 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                     ],
                   ),
                   onTap: () {
-                  Navigator.of(context).push(
-                    MaterialPageRoute(
-                      builder: (_) => ItemDetailScreen(
-                        itemId: entry.item.id,
-                        readOnly: role == UserRole.member,
+                    Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder: (_) => ItemDetailScreen(
+                          itemId: entry.item.id,
+                          readOnly: role == UserRole.member,
+                        ),
                       ),
-                    ),
-                  );
-                },
-              ),
+                    );
+                  },
+                ),
               ),
             ),
           const SizedBox(height: 16),
@@ -231,6 +293,17 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                   },
                   highlighted: true,
                 ),
+                _QuickActionCard(
+                  label: 'Good Habits',
+                  icon: Icons.sentiment_satisfied_rounded,
+                  onTap: () {
+                    Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder: (_) => const BehaviorRulesScreen(),
+                      ),
+                    );
+                  },
+                ),
               ];
               if (isNarrow) {
                 return Column(
@@ -249,6 +322,8 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                   Expanded(child: actions[1]),
                   const SizedBox(width: 12),
                   Expanded(child: actions[2]),
+                  const SizedBox(width: 12),
+                  Expanded(child: actions[3]),
                 ],
               );
             },
@@ -298,10 +373,328 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                 trailing: _ActivityBadge(entry: entry),
               ),
             ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+String _resolveHouseholdName(
+  String? householdName,
+  String? storedName,
+  AppLocalizations l10n,
+) {
+  final cleaned = householdName?.trim();
+  if (cleaned == null || cleaned.isEmpty) {
+    return storedName ?? l10n.appTitle;
+  }
+  if (cleaned == l10n.commonUnknownHousehold) {
+    return storedName ?? cleaned;
+  }
+  return cleaned;
+}
+
+class _AppBarBalanceBar extends StatelessWidget {
+  const _AppBarBalanceBar({required this.score, required this.total});
+
+  final int score;
+  final int total;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
+    final maxScale = total == 0 ? 8 : total;
+    final clampedScale = maxScale.clamp(6, 24);
+    final ratio = (score.abs() / clampedScale).clamp(0.0, 1.0);
+    final isPositive = score >= 0;
+    final barHeight = 20.0;
+    final trackColor = scheme.surfaceContainerHighest;
+    return SizedBox(
+      width: 200,
+      height: barHeight,
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          final halfWidth = constraints.maxWidth / 2;
+          final fillWidth = halfWidth * ratio;
+          return Stack(
+            alignment: Alignment.center,
+            children: [
+              Positioned.fill(
+                child: DecoratedBox(
+                  decoration: BoxDecoration(
+                    color: trackColor,
+                    borderRadius: BorderRadius.circular(999),
+                    border: Border.all(
+                      color: scheme.outlineVariant.withOpacity(0.6),
+                    ),
+                    boxShadow: [
+                      BoxShadow(
+                        color: scheme.shadow.withOpacity(0.12),
+                        blurRadius: 6,
+                        offset: const Offset(0, 2),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+              Positioned.fill(
+                child: DecoratedBox(
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(999),
+                    gradient: LinearGradient(
+                      begin: Alignment.topCenter,
+                      end: Alignment.bottomCenter,
+                      colors: [
+                        scheme.onSurface.withOpacity(0.06),
+                        Colors.transparent,
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+              Positioned(
+                left: halfWidth - 1,
+                top: 3.5,
+                bottom: 3.5,
+                child: Container(
+                  width: 2,
+                  decoration: BoxDecoration(
+                    color: scheme.outlineVariant,
+                    borderRadius: BorderRadius.circular(2),
+                  ),
+                ),
+              ),
+              if (fillWidth > 0)
+                Positioned(
+                  left: isPositive ? halfWidth : halfWidth - fillWidth,
+                  width: fillWidth,
+                  top: 2.5,
+                  bottom: 2.5,
+                  child: DecoratedBox(
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        begin: Alignment.topCenter,
+                        end: Alignment.bottomCenter,
+                        colors: isPositive
+                            ? [
+                                scheme.primary.withOpacity(0.9),
+                                scheme.primary,
+                              ]
+                            : [
+                                scheme.error.withOpacity(0.9),
+                                scheme.error,
+                              ],
+                      ),
+                      borderRadius: BorderRadius.circular(999),
+                    ),
+                  ),
+                ),
+            ],
+          );
+        },
+      ),
+    );
+  }
+}
+
+class _ConnectedPeersRow extends StatelessWidget {
+  const _ConnectedPeersRow({
+    required this.currentUserId,
+    required this.presence,
+    required this.profiles,
+    required this.primaryAdminId,
+  });
+
+  final String currentUserId;
+  final List<SyncPresenceEntry> presence;
+  final List<UserProfile> profiles;
+  final String primaryAdminId;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final profileById = {
+      for (final profile in profiles) profile.id: profile,
+    };
+    final peers = presence
+        .where((entry) => entry.userId != currentUserId)
+        .toList();
+    if (peers.isEmpty) {
+      return const SizedBox.shrink();
+    }
+    final maxVisible = 4;
+    final visible = peers.take(maxVisible).toList();
+    final extraCount = peers.length - visible.length;
+    return Padding(
+      padding: const EdgeInsets.only(right: 6),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          for (final entry in visible)
+            _PresenceAvatar(
+              initials: _initialsFor(_displayNameFor(entry.userId, profiles)),
+              color: theme.colorScheme.primaryContainer,
+              showPending: _isPendingProfile(entry.userId, profiles),
+              showPendingIcon: _isPendingProfile(entry.userId, profiles),
+              showCrown:
+                  entry.userId == primaryAdminId ||
+                  profileById[entry.userId]?.role == UserRole.admin,
+            ),
+          if (extraCount > 0)
+            _PresenceAvatar(
+              initials: '+$extraCount',
+              color: theme.colorScheme.surfaceContainerHighest,
+              showDot: false,
+            ),
         ],
       ),
     );
   }
+}
+
+class _PresenceAvatar extends StatelessWidget {
+  const _PresenceAvatar({
+    required this.initials,
+    required this.color,
+    this.showDot = true,
+    this.showCrown = false,
+    this.showPending = false,
+    this.showPendingIcon = false,
+  });
+
+  final String initials;
+  final Color color;
+  final bool showDot;
+  final bool showCrown;
+  final bool showPending;
+  final bool showPendingIcon;
+
+  @override
+  Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    return Padding(
+      padding: const EdgeInsets.only(right: 6),
+      child: Stack(
+        clipBehavior: Clip.none,
+        children: [
+          CircleAvatar(
+            radius: 16,
+            backgroundColor: color,
+            child: showPendingIcon
+                ? Icon(
+                    Icons.person_outline,
+                    size: 16,
+                    color: scheme.onPrimaryContainer,
+                  )
+                : Text(
+                    initials,
+                    style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                          fontWeight: FontWeight.w600,
+                          color: scheme.onPrimaryContainer,
+                        ),
+                  ),
+          ),
+          if (showDot)
+            Positioned(
+              right: -1,
+              bottom: -1,
+              child: Container(
+                width: 10,
+                height: 10,
+                decoration: BoxDecoration(
+                  color: Colors.green,
+                  shape: BoxShape.circle,
+                  border: Border.all(
+                    color: scheme.surface,
+                    width: 1.5,
+                  ),
+                ),
+              ),
+            ),
+          if (showPending)
+            Positioned(
+              right: -2,
+              top: -4,
+              child: Container(
+                width: 12,
+                height: 12,
+                decoration: BoxDecoration(
+                  color: scheme.surface,
+                  shape: BoxShape.circle,
+                  border: Border.all(
+                    color: scheme.surface,
+                    width: 1.2,
+                  ),
+                ),
+                child: Padding(
+                  padding: const EdgeInsets.all(1),
+                  child: CircularProgressIndicator(
+                    strokeWidth: 1.6,
+                    valueColor: AlwaysStoppedAnimation<Color>(
+                      Colors.amber.shade700,
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          if (showCrown)
+            Positioned(
+              left: -3,
+              top: -6,
+              child: Icon(
+                Icons.workspace_premium,
+                size: 14,
+                color: Colors.amber.shade700,
+              ),
+            ),
+        ],
+      ),
+    );
+  }
+}
+
+String _displayNameFor(String userId, List<UserProfile> profiles) {
+  for (final profile in profiles) {
+    if (profile.id == userId) {
+      return profile.displayName;
+    }
+  }
+  return userId;
+}
+
+bool _isPendingProfile(String userId, List<UserProfile> profiles) {
+  for (final profile in profiles) {
+    if (profile.id == userId) {
+      final name = profile.displayName.trim();
+      if (name.isEmpty) {
+        return true;
+      }
+      final lower = name.toLowerCase();
+      return name == userId ||
+          lower == 'unknown' ||
+          lower == 'unknown-user';
+    }
+  }
+  return true;
+}
+
+String _initialsFor(String name) {
+  final parts = name.trim().split(RegExp(r'\s+'));
+  if (parts.isEmpty) {
+    return '?';
+  }
+  if (parts.length == 1) {
+    final value = parts.first;
+    if (value.isEmpty) {
+      return '?';
+    }
+    final first = value[0].toUpperCase();
+    final second = value.length > 1 ? value[1].toUpperCase() : '';
+    return '$first$second';
+  }
+  return '${parts[0][0].toUpperCase()}${parts[1][0].toUpperCase()}';
 }
 
 class _ActivityEntry {
@@ -356,6 +749,8 @@ class _QuickActionCard extends StatelessWidget {
             ],
           );
     return Material(
+      borderRadius: BorderRadius.circular(18),
+      clipBehavior: Clip.antiAlias,
       color: Colors.transparent,
       child: InkWell(
         borderRadius: BorderRadius.circular(18),
@@ -607,14 +1002,14 @@ class _ActivityBadge extends StatelessWidget {
     Color foreground;
     switch (status) {
       case RequestStatus.approved:
-        background = theme.colorScheme.tertiaryContainer;
-        foreground = theme.colorScheme.onTertiaryContainer;
+        background = Colors.green.shade100;
+        foreground = Colors.green.shade900;
       case RequestStatus.rejected:
         background = theme.colorScheme.errorContainer;
         foreground = theme.colorScheme.onErrorContainer;
       case RequestStatus.pending:
-        background = theme.colorScheme.secondaryContainer;
-        foreground = theme.colorScheme.onSecondaryContainer;
+        background = Colors.blue.shade100;
+        foreground = Colors.blue.shade900;
     }
     return Column(
       mainAxisSize: MainAxisSize.min,

@@ -2,11 +2,12 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/providers/user_providers.dart';
 import '../../items/application/items_providers.dart';
+import '../../../core/sync/sync_providers.dart';
 import '../data/ledger_repository.dart';
 import '../domain/ledger_entry.dart';
 
 final ledgerRepositoryProvider = Provider<LedgerRepository>((ref) {
-  return LedgerRepository.open();
+  return LedgerRepository.open(sync: ref.read(syncCoordinatorProvider));
 });
 
 final ledgerEntriesProvider = StreamProvider<List<LedgerEntry>>((ref) {

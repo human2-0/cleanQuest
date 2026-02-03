@@ -3,8 +3,12 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/localization/localized_labels.dart';
 import '../../../core/providers/user_providers.dart';
+import '../../../core/sync/sync_models.dart';
+import '../../../core/sync/sync_providers.dart';
 import '../../../core/utils/date_format.dart';
 import '../../../l10n/app_localizations.dart';
+import '../../household/application/household_providers.dart';
+import '../../household/domain/user_profile.dart';
 import '../../items/application/items_providers.dart';
 import '../../items/domain/area_category.dart';
 import '../../items/domain/item.dart';
@@ -23,6 +27,7 @@ class ApprovalsScreen extends ConsumerWidget {
     final pending = ref.watch(pendingRequestsProvider);
     final myRequests = ref.watch(myRequestsProvider);
     final items = ref.watch(itemsListProvider).value ?? <Item>[];
+    final profiles = ref.watch(householdProfilesProvider).value ?? <UserProfile>[];
     final controller = ref.read(completionRequestsControllerProvider);
     final reviewerId = ref.read(currentUserIdProvider);
     final role = ref.watch(currentUserRoleProvider);
@@ -51,6 +56,7 @@ class ApprovalsScreen extends ConsumerWidget {
           ? _AdminApprovalsList(
               pending: pending,
               items: items,
+              profiles: profiles,
               controller: controller,
               reviewerId: reviewerId,
             )
@@ -66,12 +72,14 @@ class _AdminApprovalsList extends StatelessWidget {
   const _AdminApprovalsList({
     required this.pending,
     required this.items,
+    required this.profiles,
     required this.controller,
     required this.reviewerId,
   });
 
   final List<CompletionRequest> pending;
   final List<Item> items;
+  final List<UserProfile> profiles;
   final CompletionRequestsController controller;
   final String reviewerId;
 
@@ -106,7 +114,9 @@ class _AdminApprovalsList extends StatelessWidget {
                 ),
                 const SizedBox(height: 4),
                 Text(
-                  l10n.approvalsRequestedBy(request.submittedByUserId),
+                  l10n.approvalsRequestedBy(
+                    _displayNameFor(request.submittedByUserId, profiles),
+                  ),
                   style: Theme.of(context).textTheme.bodySmall,
                 ),
                 const SizedBox(height: 4),
@@ -192,7 +202,7 @@ class _AdminApprovalsList extends StatelessWidget {
   }
 }
 
-class _MemberRequestsList extends StatelessWidget {
+class _MemberRequestsList extends ConsumerWidget {
   const _MemberRequestsList({
     required this.requests,
     required this.items,
@@ -202,8 +212,10 @@ class _MemberRequestsList extends StatelessWidget {
   final List<Item> items;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context)!;
+    final outboxKeys =
+        ref.watch(syncOutboxKeysProvider).value ?? <String>{};
     if (requests.isEmpty) {
       return Center(child: Text(l10n.approvalsNoRequestsYet));
     }
@@ -214,6 +226,9 @@ class _MemberRequestsList extends StatelessWidget {
       itemBuilder: (context, index) {
         final request = requests[index];
         final item = _findItem(items, request, l10n);
+        final isQueued = outboxKeys.contains(
+          syncOutboxKey(SyncEntityType.completionRequests, request.id),
+        );
         return Card(
           elevation: 0.6,
           child: ListTile(
@@ -224,6 +239,10 @@ class _MemberRequestsList extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.end,
               children: [
                 _StatusPill(status: request.status),
+                if (isQueued) ...[
+                  const SizedBox(height: 4),
+                  const _QueuedPill(),
+                ],
                 const SizedBox(height: 4),
                 Text(
                   l10n.commonPointsShort(item.points),
@@ -263,6 +282,28 @@ class _StatusPill extends StatelessWidget {
   }
 }
 
+class _QueuedPill extends StatelessWidget {
+  const _QueuedPill();
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        color: theme.colorScheme.surfaceContainerHighest,
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+        child: Text(
+          'Queued',
+          style: theme.textTheme.labelSmall,
+        ),
+      ),
+    );
+  }
+}
+
 Item _findItem(
   List<Item> items,
   CompletionRequest request,
@@ -280,4 +321,13 @@ Item _findItem(
       points: 10,
     ),
   );
+}
+
+String _displayNameFor(String userId, List<UserProfile> profiles) {
+  for (final profile in profiles) {
+    if (profile.id == userId) {
+      return profile.displayName;
+    }
+  }
+  return userId;
 }

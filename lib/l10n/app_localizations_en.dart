@@ -48,6 +48,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get commonCopied => 'Copied';
 
   @override
+  String get commonUnknown => 'Unknown';
+
+  @override
   String commonPointsLabel(Object points) {
     return 'Points: $points';
   }
@@ -70,11 +73,17 @@ class AppLocalizationsEn extends AppLocalizations {
   String get onboardingTitle => 'Welcome to CleanQuest';
 
   @override
-  String get onboardingChooseRole => 'Choose your role';
+  String get onboardingChooseRole => 'Create or join a household';
 
   @override
   String get onboardingRoleSubtitle =>
-      'Admins verify work. Members submit completions.';
+      'The creator becomes admin. Everyone else joins as a member.';
+
+  @override
+  String get onboardingCreateHouseholdLabel => 'Create household';
+
+  @override
+  String get onboardingJoinHouseholdLabel => 'Join household';
 
   @override
   String get onboardingYourName => 'Your name';
@@ -84,6 +93,12 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get onboardingShareCode => 'Share this code with members';
+
+  @override
+  String get onboardingQrTitle => 'QR code';
+
+  @override
+  String get onboardingQrHint => 'Scan this QR code to join the household.';
 
   @override
   String get onboardingFinishSetup => 'Finish setup';
@@ -96,7 +111,7 @@ class AppLocalizationsEn extends AppLocalizations {
       'Members will enter this to join your household.';
 
   @override
-  String get onboardingAdminCodeLabel => 'Enter admin code';
+  String get onboardingAdminCodeLabel => 'Enter join code';
 
   @override
   String get onboardingJoinHousehold => 'Join household';
@@ -136,6 +151,12 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get settingsDailyDigestSubtitle => 'Due items and approvals summary';
+
+  @override
+  String get settingsDarkMode => 'Dark mode';
+
+  @override
+  String get settingsDarkModeSubtitle => 'Use dark theme';
 
   @override
   String get settingsLanguage => 'Language';
@@ -219,6 +240,84 @@ class AppLocalizationsEn extends AppLocalizations {
   String get settingsNoHouseholdToSwitch => 'No household to switch.';
 
   @override
+  String get settingsProfilesTitle => 'Profiles';
+
+  @override
+  String get settingsProfilesNoActive => 'No active profile';
+
+  @override
+  String get settingsProfilesAdd => 'Add profile';
+
+  @override
+  String get settingsProfilesSwitchTitle => 'Switch profile';
+
+  @override
+  String get settingsProfilesCreateTitle => 'Create profile';
+
+  @override
+  String get settingsProfilesCreateAdmin => 'Create admin profile';
+
+  @override
+  String get settingsProfilesJoinHousehold => 'Join household';
+
+  @override
+  String get settingsProfilesDisplayName => 'Display name';
+
+  @override
+  String get profileNameRequired => 'Name is required.';
+
+  @override
+  String get settingsProfilesHouseholdName => 'Household name';
+
+  @override
+  String get settingsProfilesJoinCode => 'Household code';
+
+  @override
+  String get settingsProfilesCreate => 'Create';
+
+  @override
+  String get settingsProfilesCodeLabel => 'Join code';
+
+  @override
+  String get settingsProfilesRenameTitle => 'Rename profile';
+
+  @override
+  String get settingsProfilesFindNearby => 'Find nearby';
+
+  @override
+  String get settingsProfilesDiscoveryStatusTitle => 'Discovery status';
+
+  @override
+  String get settingsProfilesDiscoveryLogTitle => 'Discovery log';
+
+  @override
+  String get settingsProfilesDiscoveryIdle => 'Idle';
+
+  @override
+  String get settingsProfilesDiscoveryStarting => 'Starting discovery...';
+
+  @override
+  String get settingsProfilesDiscoveryScanning =>
+      'Scanning for nearby households...';
+
+  @override
+  String get settingsProfilesDiscoveryFinished => 'Discovery finished.';
+
+  @override
+  String get settingsProfilesDiscoveryNone => 'No nearby households found.';
+
+  @override
+  String settingsProfilesDiscoveryFound(int count) {
+    return 'Found $count nearby households.';
+  }
+
+  @override
+  String get settingsProfilesNoNearby => 'No nearby households found';
+
+  @override
+  String get settingsProfilesNearbyTitle => 'Nearby households';
+
+  @override
   String get settingsDailyDigestScheduled => 'Daily digest scheduled';
 
   @override
@@ -274,6 +373,37 @@ class AppLocalizationsEn extends AppLocalizations {
   String get choresNoHistory => 'No history yet';
 
   @override
+  String get choresUseAmulet => 'Use amulet';
+
+  @override
+  String choresProtectionUntil(Object date) {
+    return 'Protected until $date';
+  }
+
+  @override
+  String get choresAmuletAlreadyUsed => 'Amulet already used for this chore.';
+
+  @override
+  String get choresAmuletAlreadyActive => 'Chore already protected.';
+
+  @override
+  String get choresAmuletNone => 'No amulets available.';
+
+  @override
+  String get choresAmuletSelectTitle => 'Select an amulet';
+
+  @override
+  String get choresAmuletConfirmTitle => 'Use amulet?';
+
+  @override
+  String choresAmuletConfirmBody(Object chore) {
+    return 'Use amulet on $chore?';
+  }
+
+  @override
+  String get choresAmuletApplied => 'Amulet applied';
+
+  @override
   String get choresNoteDialogTitle => 'Add a note?';
 
   @override
@@ -295,7 +425,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get choresSnoozePickDate => 'Pick a date';
 
   @override
-  String get choresRequestSubmitted => 'Request submitted';
+  String get choresRequestSubmitted => 'Submitted for review';
 
   @override
   String get choresMarkedCleaned => 'Marked as cleaned';
@@ -357,7 +487,19 @@ class AppLocalizationsEn extends AppLocalizations {
   String get choreRoomLabel => 'Room or zone (optional)';
 
   @override
+  String get choreTypeLabel => 'Chore type';
+
+  @override
+  String get choreTypeSingular => 'Singular';
+
+  @override
+  String get choreTypeRecurring => 'Recurring';
+
+  @override
   String get choreIntervalLabel => 'Interval (days)';
+
+  @override
+  String get choreOverdueWeightLabel => 'Overdue weight (points/day)';
 
   @override
   String get chorePointsLabel => 'Points';
@@ -385,6 +527,9 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get chorePointsPositive => 'Points must be a positive number.';
+
+  @override
+  String get choreOverdueWeightInvalid => 'Overdue weight must be 0 or more.';
 
   @override
   String get approvalsTitle => 'Approvals';
@@ -428,7 +573,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get approvalsRejectedToast => 'Rejected';
 
   @override
-  String get statusPending => 'Pending';
+  String get statusPending => 'Under review';
 
   @override
   String get statusApproved => 'Approved';
@@ -482,7 +627,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get dashboardChoresBoard => 'Chores board';
 
   @override
-  String get dashboardRewards => 'Rewards';
+  String get dashboardRewards => 'Shop';
 
   @override
   String get dashboardApprovals => 'Approvals';
@@ -507,7 +652,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get dashboardActivityRedemption => 'Mystery box opened';
 
   @override
-  String get rewardsTitle => 'Rewards';
+  String get rewardsTitle => 'Shop';
 
   @override
   String get rewardsPointsBalance => 'Points balance';
@@ -535,7 +680,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String rewardsWeightStatus(Object weight, Object status) {
-    return 'Weight $weight • $status';
+    return 'Chance $weight% • $status';
   }
 
   @override
@@ -562,22 +707,77 @@ class AppLocalizationsEn extends AppLocalizations {
   String get rewardsMyRewards => 'My rewards';
 
   @override
-  String get rewardsAdminRewards => 'Admin rewards';
+  String get shopItemsTitle => 'Shop items';
 
   @override
-  String get rewardsMemberRewards => 'Member rewards';
+  String get shopBuy => 'Buy';
+
+  @override
+  String get shopPurchaseSuccess => 'Added to inventory';
+
+  @override
+  String get inventoryTitle => 'Inventory';
+
+  @override
+  String get inventoryEmpty => 'No items yet.';
+
+  @override
+  String get inventoryUseFromChore => 'Use from a chore menu';
+
+  @override
+  String amuletLossProtection(Object hours) {
+    return 'Amulet of loss protection (${hours}h)';
+  }
+
+  @override
+  String amuletDurationLabel(Object hours) {
+    return 'Pauses overdue for $hours hours';
+  }
 
   @override
   String get rewardsNoRedemptions => 'No redemptions yet.';
 
   @override
-  String get rewardsNoAdminRewards => 'No admin rewards yet.';
-
-  @override
-  String get rewardsNoMemberRewards => 'No member rewards yet.';
-
-  @override
   String get rewardsViewAll => 'View all';
+
+  @override
+  String get rewardsFilterLabel => 'Filter';
+
+  @override
+  String get rewardsFilterAll => 'All';
+
+  @override
+  String get rewardsRedeem => 'Redeem';
+
+  @override
+  String get rewardsRedeemRequested => 'Redemption requested';
+
+  @override
+  String get rewardsRedeemRequestsTitle => 'Redemption requests';
+
+  @override
+  String get rewardsNoRedeemRequests => 'No redemption requests.';
+
+  @override
+  String get rewardsStatusActive => 'Active';
+
+  @override
+  String get rewardsStatusPending => 'Under review';
+
+  @override
+  String get rewardsStatusUsed => 'Used';
+
+  @override
+  String get rewardsStatusRejected => 'Rejected';
+
+  @override
+  String get rewardsNothingFound => 'Nothing found';
+
+  @override
+  String get rewardsChanceInvalid => 'Chance must be between 0 and 100%.';
+
+  @override
+  String get rewardsChanceOverLimit => 'Total chance cannot exceed 100%.';
 
   @override
   String rewardsCostPoints(Object cost) {
@@ -608,7 +808,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get rewardsDescriptionLabel => 'Description';
 
   @override
-  String get rewardsWeightLabel => 'Weight';
+  String get rewardsWeightLabel => 'Chance (%)';
 
   @override
   String get rewardsEnabledLabel => 'Enabled';
@@ -617,7 +817,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get rewardsCostPointsLabel => 'Cost points';
 
   @override
-  String get rewardsCooldownSecondsLabel => 'Cooldown seconds';
+  String get rewardsCooldownSecondsLabel => 'Cooldown (days)';
 
   @override
   String get rewardsMaxPerDayLabel => 'Max per day';

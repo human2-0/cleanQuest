@@ -4,6 +4,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/localization/localized_labels.dart';
 import '../../../core/utils/date_format.dart';
 import '../../../l10n/app_localizations.dart';
+import '../../household/application/household_providers.dart';
+import '../../household/domain/user_profile.dart';
 import '../../items/application/items_providers.dart';
 import '../../items/domain/area_category.dart';
 import '../../items/domain/item.dart';
@@ -20,6 +22,7 @@ class ApprovalsHistoryScreen extends ConsumerWidget {
     final requests =
         ref.watch(completionRequestsProvider).value ?? <CompletionRequest>[];
     final items = ref.watch(itemsListProvider).value ?? <Item>[];
+    final profiles = ref.watch(householdProfilesProvider).value ?? <UserProfile>[];
     final sorted = [...requests]
       ..sort((a, b) => b.submittedAt.compareTo(a.submittedAt));
 
@@ -65,7 +68,7 @@ class ApprovalsHistoryScreen extends ConsumerWidget {
                         const SizedBox(height: 6),
                         Text(
                           l10n.approvalsRequestedBy(
-                            request.submittedByUserId,
+                            _displayNameFor(request.submittedByUserId, profiles),
                           ),
                           style: Theme.of(context).textTheme.bodySmall,
                         ),
@@ -89,7 +92,7 @@ class ApprovalsHistoryScreen extends ConsumerWidget {
                           const SizedBox(height: 4),
                           Text(
                             l10n.approvalsReviewedBy(
-                              request.reviewedByUserId!,
+                              _displayNameFor(request.reviewedByUserId!, profiles),
                             ),
                             style: Theme.of(context).textTheme.bodySmall,
                           ),
@@ -154,4 +157,13 @@ Item _findItem(
       points: 10,
     ),
   );
+}
+
+String _displayNameFor(String userId, List<UserProfile> profiles) {
+  for (final profile in profiles) {
+    if (profile.id == userId) {
+      return profile.displayName;
+    }
+  }
+  return userId;
 }

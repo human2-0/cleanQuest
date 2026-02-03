@@ -1,6 +1,8 @@
 import '../../features/approvals/domain/request_status.dart';
 import '../../features/items/domain/area_category.dart';
 import '../../features/items/domain/item_status.dart';
+import '../../features/items/domain/item_type.dart';
+import '../../features/rewards/domain/redemption_status.dart';
 import '../../l10n/app_localizations.dart';
 
 String localizedAreaCategory(AppLocalizations l10n, AreaCategory category) {
@@ -28,6 +30,31 @@ String localizedItemStatus(AppLocalizations l10n, ItemStatus status) {
       return l10n.itemStatusSnoozed;
     case ItemStatus.paused:
       return l10n.itemStatusPaused;
+  }
+}
+
+String localizedItemType(AppLocalizations l10n, ItemType type) {
+  switch (type) {
+    case ItemType.singular:
+      return l10n.choreTypeSingular;
+    case ItemType.recurring:
+      return l10n.choreTypeRecurring;
+  }
+}
+
+String localizedRedemptionStatus(
+  AppLocalizations l10n,
+  RedemptionStatus status,
+) {
+  switch (status) {
+    case RedemptionStatus.active:
+      return l10n.rewardsStatusActive;
+    case RedemptionStatus.pending:
+      return l10n.rewardsStatusPending;
+    case RedemptionStatus.used:
+      return l10n.rewardsStatusUsed;
+    case RedemptionStatus.rejected:
+      return l10n.rewardsStatusRejected;
   }
 }
 

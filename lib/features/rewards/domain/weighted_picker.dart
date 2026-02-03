@@ -7,14 +7,18 @@ class WeightedPicker {
 
   final Random _random;
 
-  Reward pick(List<Reward> rewards) {
-    final enabled = rewards.where((reward) => reward.enabled && reward.weight > 0).toList();
+  Reward? pick(List<Reward> rewards) {
+    final enabled =
+        rewards.where((reward) => reward.enabled && reward.weight > 0).toList();
     if (enabled.isEmpty) {
-      throw StateError('No eligible rewards to pick.');
+      return null;
     }
     final totalWeight =
         enabled.fold<int>(0, (sum, reward) => sum + reward.weight);
-    final roll = _random.nextInt(totalWeight) + 1;
+    if (totalWeight <= 0) {
+      return null;
+    }
+    final roll = _random.nextInt(100) + 1;
     var cumulative = 0;
     for (final reward in enabled) {
       cumulative += reward.weight;
@@ -22,6 +26,6 @@ class WeightedPicker {
         return reward;
       }
     }
-    return enabled.last;
+    return null;
   }
 }
