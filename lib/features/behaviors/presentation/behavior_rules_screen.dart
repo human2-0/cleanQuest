@@ -48,7 +48,9 @@ class BehaviorRulesScreen extends ConsumerWidget {
                           children: [
                             Expanded(
                               child: Text(
-                                rule.name,
+                                rule.name.trim().isEmpty
+                                    ? 'Unnamed habit'
+                                    : rule.name,
                                 style: Theme.of(context).textTheme.titleMedium,
                               ),
                             ),

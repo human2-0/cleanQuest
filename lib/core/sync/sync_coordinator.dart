@@ -961,6 +961,7 @@ class SyncCoordinator {
           .where((dto) =>
               dto.householdId == _householdId ||
               dto.householdId.trim().isEmpty)
+          .where((dto) => dto.name.trim().isNotEmpty)
           .map((dto) => SyncPayloadCodec.behaviorRuleToMap(dto))
           .toList(),
       SyncEntityType.households.wire: _householdsBox.values
@@ -1739,6 +1740,10 @@ class SyncCoordinator {
         final hasDislikes = normalized.containsKey('dislikes') ||
             normalized.containsKey('dislikeCount') ||
             normalized.containsKey('thumbsDown');
+        final incomingName = incoming.name.trim();
+        if (existing == null && (!hasName || incomingName.isEmpty)) {
+          return;
+        }
         final merged = existing == null
             ? incoming
             : BehaviorRuleDto(
@@ -1746,11 +1751,19 @@ class SyncCoordinator {
                 householdId: incoming.householdId.trim().isEmpty
                     ? existing.householdId
                     : incoming.householdId,
-                name: hasName && incoming.name.trim().isNotEmpty
-                    ? incoming.name
+                name: hasName && incomingName.isNotEmpty
+                    ? incomingName
                     : existing.name,
-                likes: hasLikes ? incoming.likes : existing.likes,
-                dislikes: hasDislikes ? incoming.dislikes : existing.dislikes,
+                likes: hasLikes
+                    ? (incoming.likes > existing.likes
+                        ? incoming.likes
+                        : existing.likes)
+                    : existing.likes,
+                dislikes: hasDislikes
+                    ? (incoming.dislikes > existing.dislikes
+                        ? incoming.dislikes
+                        : existing.dislikes)
+                    : existing.dislikes,
               );
         await _behaviorRulesBox.put(id, merged);
         return;
